@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: dolphinscheduler-ui
+  namespace: db-services
+spec:
+  gateways:
+  - istio-system/g32-istio-ingressgateway-inner
+  hosts:
+  - dolphinscheduler-ui.g32-prod.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: dolphinscheduler-api.db-services.svc.cluster.local
+        port:
+          number: 12345

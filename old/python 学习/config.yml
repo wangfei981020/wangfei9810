@@ -1,0 +1,13 @@
+loki_url: "http://loki.g32-prod.com/loki/api/v1/query_range"
+webhook_url: "https://open.larksuite.com/open-apis/bot/v2/hook/04dd7c92-e67f-4b49-9c3b-e96f049b8e45"
+g32_wallet_openapi_webhook_url: "https://open.larksuite.com/open-apis/bot/v2/hook/5d23c217-5816-408d-ab16-c0145b4e22ce"
+namespace:
+    - g32-admin
+    - g32-base
+    - g32-bet-settle
+    - g32-game
+    - g32-game-center
+    - g32-merchant
+    - g32-openapi
+    - g32-user
+    - g32-wallet

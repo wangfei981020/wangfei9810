@@ -1,0 +1,4 @@
+kubectl create secret tls g101-prod-com-cert \
+  --cert=g101-prod.com.crt \
+  --key=g101-prod.com.key \
+  --namespace=istio-system

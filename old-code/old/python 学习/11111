@@ -1,0 +1,326 @@
+    location /game/getFirstTimeLose {
+        limit_req zone=getFirstTimeLose_limit burst=120 delay=3000;
+        proxy_pass http://gi-game;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+    }
+
+
+
+    limit_req_zone $binary_remote_addr zone=getFirstTimeLose_limit:100m rate=120r/s;
+
+
+    {
+        "@source": [
+          "10.195.2.204"
+        ],
+        "@timestamp": [
+          "2024-10-20T02:37:07.000Z"
+        ],
+        "agent.ephemeral_id": [
+          "5cd991ab-b7d9-4dc5-9f43-0c1caf8867df"
+        ],
+        "agent.hostname": [
+          "G20_nginx-02"
+        ],
+        "agent.id": [
+          "8bea77df-8c06-4f7b-b16b-ee16b447c0a3"
+        ],
+        "agent.name": [
+          "G20_nginx-02"
+        ],
+        "agent.type": [
+          "filebeat"
+        ],
+        "agent.version": [
+          "8.8.2"
+        ],
+        "args": [
+          "loginname=C69bingoplusazcs5h&timestamp=1729391826"
+        ],
+        "cf_ipcountry": [
+          "PH"
+        ],
+        "cf_ray": [
+          "8d559fc94daca9ab-CGY"
+        ],
+        "client_real_ip": [
+          "10.195.1.84"
+        ],
+        "device_type": [
+          "Windows"
+        ],
+        "domain": [
+          "gi-game.g20-prod.com"
+        ],
+        "ecs.version": [
+          "8.0.0"
+        ],
+        "fields.environment_name": [
+          "PROD"
+        ],
+        "fields.log_type": [
+          "G20-gi-game-backend-access"
+        ],
+        "fields.product_name": [
+          "G20"
+        ],
+        "host.name": [
+          "G20_nginx-02"
+        ],
+        "hostname": [
+          "g20_nginx-02"
+        ],
+        "http_user_agent": [
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        ],
+        "https": [
+          ""
+        ],
+        "input.type": [
+          "log"
+        ],
+        "ip": [
+          "249.89.254.191"
+        ],
+        "log.file.path": [
+          "/data/wwwlogs/gi-game-backend-access.log"
+        ],
+        "log.offset": [
+          551135659
+        ],
+        "referer": [
+          "https://gci-web.g20-prod.com/"
+        ],
+        "request": [
+          "/game/getFirstTimeLose?loginname=C69bingoplusazcs5h&timestamp=1729391826"
+        ],
+        "request_method": [
+          "POST"
+        ],
+        "responsetime": [
+          0
+        ],
+        "scheme": [
+          "http"
+        ],
+        "size": [
+          596
+        ],
+        "status": [
+          503
+        ],
+        "upstreamaddr": [
+          "-"
+        ],
+        "upstreamtime": [
+          "-"
+        ],
+        "_id": "IhrJp5IBhifJpbqwHJnf",
+        "_index": ".ds-nginx-g20-gi-game-backend-access-g20-prod-filebeat-2024.10.17-000001",
+        "_score": null
+      }
+
+
+
+      curl 'https://gi-game.g20-prod.com/dailyLeaderboard?loginname=002new007&timestamp=1729393544' \
+  -H 'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1' \
+  -H 'Content-Type: text/json, application/x-www-form-urlencoded;charset=UTF-8' \
+  -H 'Referer: https://gci-web.g20-prod.com/' \
+  --data-raw '{"data":"TtTPDy4hs1cS2365YEDnD2IstjyUO23l5pzu9N+wljoSVe55WzGVFzr43O7tSk85L31mpqQqkHEnvdT+iaTTETVNRoAS+ute1CHTMHmFsUU="}'
+
+  curl  http://127.0.0.1:8064/actuator/health
+  curl  http://127.0.0.1:8064/swagger-ui.html
+
+
+  location /game/performReceiveRights {
+    deny all;
+}
+
+
+istio-ingressgateway-internal   LoadBalancer   172.31.169.201   10.163.48.39  9092:32116/TCP   80d
+
+KAFKA_CFG_ADVERTISED_LISTENERS
+kubectl edit statefulset kafka-test -n g29-uat
+kubectl rollout restart statefulset kafka-test -n g29-uat
+helm upgrade -i kafka-test . -n g29-uat
+helm uninstall kafka-test  -n g29-uat
+
+CLIENT://10.163.48.39:9092
+
+
+
+configurationOverrides:
+  advertised.listeners: INSIDE://my-kafka:9092,OUTSIDE://<external-domain-or-ip>:9092
+  listener.security.protocol.map: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+  listeners: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9092
+
+  kafka-test
+
+
+  [root@ppu-k8s-master ~]# kubectl get svc -n g29-uat 
+NAME                          TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+kafka-test                    ClusterIP   172.31.128.192   <none>        9092/TCP                     26m
+
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.istio.io/v1alpha3","kind":"Gateway","metadata":{"annotations":{},"name":"main-gw-ops","namespace":"istio-system"},"spec":{"selector":{"istio":"ingressgateway-internal"},"servers":[{"hosts":["*.slleisure.com","*.g18-uat.com","*.g29-uat.com"],"port":{"name":"http2","number":80,"protocol":"HTTP"},"tls":{"httpsRedirect":false}},{"hosts":["*.slleisure.com"],"port":{"name":"https","number":443,"protocol":"HTTPS"},"tls":{"credentialName":"slleisure-com-cert","minProtocolVersion":"TLSV1_2","mode":"SIMPLE"}},{"hosts":["*"],"port":{"name":"ppu-tidb","number":4000,"protocol":"TCP"}},{"hosts":["*"],"port":{"name":"g18-uat-redis","number":6379,"protocol":"TCP"}},{"hosts":["*"],"port":{"name":"tidb-pd","number":2379,"protocol":"TCP"}},{"hosts":["*"],"port":{"name":"tidb-10080","number":10080,"protocol":"TCP"}},{"hosts":["*"],"port":{"name":"kafka-g29","number":9092,"protocol":"TCP"}}]}}
+  creationTimestamp: "2024-08-01T10:08:19Z"
+  generation: 10
+  name: main-gw-ops
+  namespace: istio-system
+  resourceVersion: "122672024"
+  uid: 8dd7cac9-8fca-4e63-aaf2-e37634b6b866
+spec:
+  selector:
+    istio: ingressgateway-internal
+  servers:
+  - hosts:
+    - '*.g29-uat.com'
+    port:
+      name: http2
+      number: 80
+      protocol: HTTP
+    tls:
+      httpsRedirect: false
+
+    port:
+      name: kafka-g29
+      number: 9092
+      protocol: TCP
+
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: kafka-internal-test
+  namespace: g29-uat
+spec:
+  gateways:
+  - istio-system/main-gw-ops
+  hosts:
+    # - kafka.g29-uat.svc.cluster.local
+  - "10.163.48.39"
+  tcp:
+  - match:
+    - port: 9092
+    route:
+    - destination:
+        host: kafka-test-headless.g29-uat.svc.cluster.local
+        port:
+          number: 9092
+
+- hosts:
+- '*'
+port:
+name: kafka-g29
+number: 9092
+protocol: TCP
+
+
+ansible -i g20_uat_hosts G20-java02 -m ansible.posix.synchronize -a "mode=push src=/data/vcs/g20/tidb/G20-gi-gamedata/343d193507ee0c6813738c8d5635ba2cc4d50ed4 dest=devops@10.161.64.20:/data/g20/G20-gi-gamedata"
+
+
+
+ansible -i g20_uat_hosts G20-java02  -m copy -a "src=/tmp/g20-gamedata.tar dest=/tmp/g20-gamedata.tar1"
+
+
+[base]
+name=CentOS-$releasever - Base
+baseurl=http://vault.centos.org/7.9.2009/os/x86_64/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS7
+
+goproxy.g20-prod.com
+
+studio-goproxy.g20-prod.com
+
+vim pachinko/ProxyConfig.json
+vim led-nep/ProxyConfig.json
+
+helm upgrade -i test-goproxy . -n g18-uat
+helm uninstall test-goproxy  -n g18-uat
+helm install test-goproxy --dry-run 
+
+docker build -t harbor.slleisure.com/env/goproxy:v23 .
+docker push harbor.slleisure.com/env/goproxy:v23
+
+app.kubernetes.io/instance=test-goproxy
+app.kubernetes.io/name=goproxy
+
+#mv /tmp/_report_config_file_${NODE_NAME}.bin /app/_report_config_file.bin
+#for i in {1..5}; do
+#    mv /tmp/_report_config_file_${NODE_NAME}.bin /app/_report_config_file.bin && break || sleep 2
+#done
+
+docker pull harbor.slleisure.com/env/busybox:v1
+      initContainers:
+      - name: init-config
+        image: alpine:3.7
+        command: ['sh', '-c', '
+          NODE_NAME=$(echo $HOSTNAME | tr -dc A-Za-z0-9 | head -c 12);
+          PROCESS_NAME=$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 12);
+          echo "{\"nodename\":\"$NODE_NAME\",\"processname\":\"$PROCESS_NAME\"}" > /app/_report_config_file.bin
+        ']
+        env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+
+
+
+helm upgrade -i -n g18-uat gci-web-mtgameh5-test gci-web-mtgameh5 
+helm uninstall gci-web-mtgameh5-test  -n g18-uat
+{{- range $i := until .Values.replicaCount }}
+- name: test-goproxy-log-volume-{{ $i }}
+  # 其他配置
+{{- end }}
+test-goproxy-data-0
+
+
+netstat -an | awk '/^tcp/ {++S[$NF]} END {for(a in S) print a, S[a]}' ;date ;
+
+
+http://127.0.0.1:8064/actuator/health
+
+
+18.163.229.158
+43.199.127.243
+
+g18-prod-eksgw.cfedge.net.
+
+
+docker run -d --name test-docker-goproxy -p 8080:80 harbor.slleisure.com/env/goproxy:v6
+
+
+2024102412.log  2024102413.log  2024102414.log
+/app/logs/2024-10-24 # pwd 
+/app/logs/2024-10-24
+
+
+
+
+helm template my-release ./goproxy --values values.yaml
+summary: PROD Blackbox probe failed (instance 10.195.2.202:8064) in G20 
+summary: PROD Blackbox probe failed (instance 10.195.2.170:8064) in G20 
+summary: PROD Blackbox probe failed (instance10.195.2.183:8064) in G20 
+summary: PROD Blackbox probe failed (instance 10.195.2.210:8064) in G20 
+summary: PROD Blackbox probe failed (instance 10.195.2.23:8064) in G20 
+10.195.2.202:8064
+10.195.2.170:8064
+10.195.2.183:8064
+10.195.2.210:8064
+10.195.2.23:8064

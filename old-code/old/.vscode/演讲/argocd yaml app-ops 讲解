@@ -1,0 +1,21 @@
+global:                               # 全局配置部分，定义了应用程序的全局参数。
+  env: uat                           # 定义环境（environment），值为 "uat"。用于指定部署的环境，如 "uat"、"prod" 等。
+  helmDefault: false                  # 是否使用 Helm 默认设置，false 表示不使用默认值，可能会使用自定义值。
+  valuesFile: values.yaml            # 指定 Helm 配置的值文件，值文件为 "values.yaml"，用于覆盖 Helm 图表的默认值。
+  spec:                               # 全局配置下的应用部署相关的细节配置。
+    project: g32-uat                  # 应用所属的 Argo CD 项目，项目名为 "g32-uat"。
+    destination:                      # 目标 Kubernetes 集群的配置。
+      server: https://kubernetes.default.svc # Kubernetes API 服务器的地址，表示该应用部署在当前集群内。
+      namespace: g32-uat               # 目标 Kubernetes 集群的命名空间，应用将在 "g32-uat" 命名空间中部署。
+    source:                           # 应用源代码的配置。
+      repoURL: https://gitlab-devops.slleisure.com/argocd/ppu-k8s-platform.git # Git 仓库的 URL，指定 Argo CD 从该仓库获取源代码。
+      targetRevision: HEAD            # Git 仓库的分支或提交，"HEAD" 表示最新的提交。
+  
+argocdApplications:                  # Argo CD 应用程序的配置部分，包含多个应用定义。
+#1                                  # 注释或索引，这里是对第一个应用的注释。
+  base-central-backend:               # 应用名称为 "base-central-backend"。
+    disableAutomated: false           # 自动同步是否禁用，false 表示启用自动同步。启用后，Argo CD 会自动同步应用状态到目标环境。
+    disable: false                    # 应用是否禁用，false 表示启用该应用的部署。
+    name: base-central-backend        # 应用的名称，这里是 "base-central-backend"。
+    helm: true                        # 是否使用 Helm 部署该应用，true 表示使用 Helm 部署。
+    namespace: g32-uat                # 应用部署的 Kubernetes 命名空间，这里是 "g32-uat"。

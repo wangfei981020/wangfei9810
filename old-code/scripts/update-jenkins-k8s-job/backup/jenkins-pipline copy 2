@@ -1,0 +1,219 @@
+pipeline {
+    agent any
+    environment {
+        PROJ = "g101-uat"
+        ARGOCD_SERVER = "ppu-argocd-jenkins.slleisure.com"
+        LARK_WEBHOOK = "https://infra-k8s-jenkins-test.slleisure.com/send_lark_card"
+    }
+    stages {
+        stage('Initialize') {
+            steps {
+                script {
+                    // Parse input parameters
+                    proj_item = params.selected_value.split(':')[0]
+                    new_version = params.selected_value.split(':')[1]
+                    env.new_version = new_version
+                    
+                    // Validate input
+                    if (!params.only_restart && (new_version == null || new_version.isEmpty())) {
+                        error("New version is required when not performing restart only")
+                    }
+                    
+                    echo "Project Item: ${proj_item}"
+                    echo "New Version: ${new_version}"
+                    echo "Only Restart: ${params.only_restart}"
+                    def build_time = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd HH:mm:ss")
+                    echo "Build Time: ${build_time}"
+                    
+                    // Store build time in environment variable for later access
+                    env.BUILD_TIME = build_time
+                }
+            }
+        }
+        
+        stage('Checkout and Update Code') {
+            steps {
+                dir('/data/k8s/ppu-k8s-platform') {
+                    script {
+                        // Configure Git identity
+                        sh 'git pull'
+                        
+                        def git_path = "argocd-apps/charts/${env.PROJ}/${proj_item}"
+                        def message = ""
+                        
+                        // Get old version from values.yaml
+                        def old_version = sh(
+                            script: "grep -oP 'tag:\\s*\"\\K[^\"]+' ${git_path}/values.yaml",
+                            returnStdout: true
+                        ).trim()
+                        
+                        // Store old version in environment variable
+                        env.OLD_VERSION = old_version
+
+                        if (params.only_restart) {
+                            echo "Performing service restart..."
+                            def new_current = sh(script: 'date "+%Y-%m-%d %H:%M:%S"', returnStdout: true).trim()
+                            def old_current = sh(
+                                script: "grep -oP '\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}' ${git_path}/templates/deployment.yaml || echo 'error'",
+                                returnStdout: true
+                            ).trim()
+                            
+                            if (old_current != "error") {
+                                sh "sed -i 's/manual restart at ${old_current}/manual restart at ${new_current}/g' ${git_path}/templates/deployment.yaml"
+                                message = "manual restart at ${new_current} (previous: ${old_current})"
+                            } else {
+                                message = "No manual update annotations found"
+                            }
+                        } else {
+                            echo "Upgrading to version ${new_version}"
+                            
+                            if (old_version == new_version) {
+                                currentBuild.result = 'UNSTABLE'
+                                echo "Version has not changed. Marking build as UNSTABLE."
+                                
+                                // Send Lark notification with yellow status (version has not changed)
+                                sendLarkNotification('orange')
+                                return  // Exit without further processing
+                            }
+                            
+                            sh "sed -i 's/  tag: .*/  tag: \"${new_version}\"/g' ${git_path}/values.yaml"
+                            message = "Update ${env.PROJ} ${proj_item} to ${new_version} at ${new Date().format('yyyy-MM-dd HH:mm:ss')}"
+                        }
+                        
+                        // Commit and push changes
+                        sh 'git add .'
+                        sh "git commit -m '${message}'"
+                        sh 'git push origin main'
+                    }
+                }
+            }
+        }
+        
+        stage('ArgoCD Sync') {
+            when {
+                expression { env.new_version != env.OLD_VERSION } // Only execute if the version has changed
+            }
+            steps {
+                script {
+                    echo "new :  ${env.new_version }"
+                    echo "old:  ${env.OLD_VERSION}"
+                    def argocd_app = "${proj_item}-${env.PROJ}"
+                    echo "Attempting ArgoCD login with server: ${env.ARGOCD_SERVER}, app: ${argocd_app}"
+                    withCredentials([usernamePassword(
+                        credentialsId: 'eb8b6f2b-2afe-4ec2-8c8e-88f60d0f2176',
+                        usernameVariable: 'ARGOCD_USER',
+                        passwordVariable: 'ARGOCD_PASSWORD'
+                    )]) {
+                        // Login to ArgoCD
+                        sh """
+                            argocd login ${env.ARGOCD_SERVER} \
+                            --username ${ARGOCD_USER} \
+                            --password ${ARGOCD_PASSWORD} \
+                            --grpc-web > /dev/null 2>&1
+                        """
+                        
+                        // Perform sync
+                        // sh "argocd app sync ${argocd_app} --grpc-web > /dev/null 2>&1"
+                        // sh "argocd app sync aaa --grpc-web > /dev/null 2>&1"
+                    }
+                    
+                    // argocd sync
+                    def argocd_sync_status = sh(
+                        script: "argocd app sync aaa --grpc-web > /dev/null 2>&1",
+                        returnStdout: true
+                    ).trim()
+                    
+                    if (argocd_sync_status != 0) {
+                        echo "argocd_sync_status: ${argocd_sync_status}"
+                        echo "ArgoCD同步失败。请检查应用是否已成功添加到ArgoCD中。应用名称: ${argocd_app}"
+                        // error("ArgoCD同步失败。请检查应用是否已成功添加到ArgoCD中。应用名称: ${argocd_app}")
+                        env.SYNC_FAILED = "true"
+                        // return // Stop further steps
+                    }
+
+                    // Verify sync status
+                    def sync_status = sh(
+                        script: "argocd app get ${argocd_app} -o json --grpc-web | jq -r '.status.sync.status'",
+                        returnStdout: true
+                    ).trim()
+                    
+                    if (sync_status != "Synced") {
+                        error("ArgoCD sync failed with status: ${sync_status}")
+                    }
+                }
+            }
+        }
+        
+        stage('Verify Deployment') {
+            when {
+                expression { env.new_version != env.OLD_VERSION && env.SYNC_FAILED != "true"} // Only execute if the version has changed
+            }
+            steps {
+                script {
+                    def argocd_app = "${proj_item}-${env.PROJ}"
+                    def max_retries = 0
+                    def retry_count = 0
+                    def status = "green"
+                    
+                    while (true) {
+                        def health_status = sh(
+                            script: "argocd app get ${argocd_app} -o json --grpc-web | jq -r '.status.resources[] | select(.kind==\"Deployment\") | .health.status'",
+                            returnStdout: true
+                        ).trim()
+                        
+                        if (health_status == "Healthy") {
+                            echo "Deployment successful!"
+                            break
+                        } else if (health_status == "Degraded") {
+                            status = "red"
+                            echo 'pod 启动失败'
+                            error("Deployment failed!")
+                        }
+                        
+                        if (retry_count >= max_retries) {
+                            status = "yellow"
+                            echo 'pod 启动已超过 5 分钟, 请手动检查'
+                            break
+                        }
+                        
+                        retry_count++
+                        sleep 10
+                    }
+                    
+                    // Send final notification
+                    sendLarkNotification(status)
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            cleanWs()
+        }
+        failure {
+            script {
+                sendLarkNotification('red')
+            }
+        }
+    }
+}
+
+def sendLarkNotification(String status) {
+        def payload = """
+        {
+            "name": "${currentBuild.getBuildCauses()[0].userId ?: 'system'}",
+            "namespace": "${env.PROJ}",
+            "container": "${proj_item}",
+            "version": "${new_version}",
+            "uptime": "${env.BUILD_TIME}", 
+            "status": "${status}"
+        }
+        """
+        
+        sh """
+            curl -X POST ${env.LARK_WEBHOOK} \
+            -H "Content-Type: application/json" \
+            -d '${payload}'
+        """
+}

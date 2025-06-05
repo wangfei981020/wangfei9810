@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户信息</title>
+</head>
+<body>
+    <h1>欢迎, {{ user.name }}!</h1>
+    <p>你的年龄是: {{ user.age }} 岁</p>
+    <p>爱好: {{ user.hobby }}</p>
+    <p>
+        {% if user.age >= 18 %}
+            你已成年。
+        {% else %}
+            你是未成年人。
+        {% endif %}
+    </p>
+    <ul>
+        {% for hobby in user.hobbies %}
+            <li>{{ hobby }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

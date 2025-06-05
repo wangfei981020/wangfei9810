@@ -1,0 +1,84 @@
+select group_name,rule_name,trigger_value,original_tags from alert_cur_event;
+select group_name,rule_name,trigger_value,original_tags from alert_cur_event where group_name="ppu";
+
+
+SELECT 
+    group_name,
+    rule_name,
+    trigger_value,
+    original_tags,
+    SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'instance=', -1), ',', 1) AS instance,
+    SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'project=', -1), ',', 1) AS project,
+    SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'nodename=', -1), ',', 1) AS nodename
+FROM 
+    alert_cur_event where group_name="g09";
+WHERE 
+    group_name = "uat";
+
+
+SELECT 
+    group_name,
+    rule_name,
+    trigger_value,
+    SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'instance=', -1), ',', 1) AS instance,
+    SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'project=', -1), ',', 1) AS project,
+    SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'nodename=', -1), ',', 1) AS nodename
+FROM 
+    alert_cur_event where group_name="ppu";
+
+
+SELECT 
+    group_name,
+    rule_name,
+    trigger_value,
+    SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'instance=', -1), ',', 1) AS instance,
+    -- 如果 'project=' 字符串不存在，则返回空字符串
+    IF(LOCATE('project=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'project=', -1), ',', 1),
+        '') AS project,
+    -- 如果 'nodename=' 字符串不存在，则返回空字符串
+    IF(LOCATE('nodename=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'nodename=', -1), ',', 1),
+        '') AS nodename,
+    -- 如果 'nodename=' 字符串不存在，则返回空字符串
+    IF(LOCATE('namespace=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'namespace=', -1), ',', 1),
+        '') AS namespace,
+    -- 如果 'nodename=' 字符串不存在，则返回空字符串
+    IF(LOCATE('container=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'container=', -1), ',', 1),
+        '') AS container
+FROM 
+    alert_cur_event
+WHERE 
+    group_name = "g29";
+
+
+
+
+
+
+SELECT 
+    1 AS "Status",  -- 新增列，用于标记红色状态
+    group_name AS env,
+    rule_name,
+    trigger_value AS value,
+    IF(LOCATE('nodename=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'nodename=', -1), ',', 1),
+        '') AS nodename,
+    IF(LOCATE('namespace=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'namespace=', -1), ',', 1),
+        '') AS namespace,
+    IF(LOCATE('container=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'container=', -1), ',', 1),
+        '') AS container,
+    IF(LOCATE('instance=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'instance=', -1), ',', 1),
+        '') AS instance,
+    IF(LOCATE('project=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'project=', -1), ',', 1),
+        '') AS projec
+FROM 
+    alert_cur_event
+WHERE 
+    group_name IN ($env1)

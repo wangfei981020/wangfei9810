@@ -1,0 +1,111 @@
+pipeline {
+    agent any
+
+    environment {
+        // 设置环境变量
+        PROJ = "g32-uat"
+        GIT_BRANCH = "main"
+    }
+
+
+    stages {
+        stage('初始化') {
+            steps {
+                script {
+                    // 从参数中提取 proj_item 和 new_version
+                    def selectedValue = params.selected_value
+                    def parts = selectedValue.split(":")
+                    def projItem = parts[0]
+                    def newVersion = parts[1]
+                    echo "selectedvalue: ${selectedValue}"
+                    
+                    // 打印 proj_item 和 new_version
+                    echo "Project Item: ${projItem}"
+                    echo "New Version: ${newVersion}"
+                    
+                    // 设置环境变量
+                    env.PROJ_ITEM = projItem
+                    env.NEW_VERSION = newVersion
+                    env.ONLY_RESTART = params.onlyrestart
+                    env.DATA_PATH= "/data/k8s/ppu-k8s-platform"
+                    env.NEED_COMMIT = "false"
+                }
+            }
+        }
+		stage('拉取 Git 仓库') {
+            steps {
+                script {
+                    // 拉取最新代码
+					echo "拉去仓库"
+                    //dir('/data/k8s/ppu-k8s-platform') {
+                    //     sh 'git pull'
+                    }
+                }
+            }
+        stage('处理重启操作或版本更新') {
+            steps {
+                script {
+                    if (env.ONLY_RESTART == 'true') {
+                        // 如果选择仅重启，更新重启时间
+						echo "仅重启"
+                        // def newCurrent = sh(script: 'date "+%Y-%m-%d %H:%M:%S"', returnStdout: true).trim()
+                        // def oldCurrent = sh(script: """
+                        //     grep -oP '\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}' argocd-apps/charts/${env.PROJ}/${env.PROJ_ITEM}/templates/deployment.yaml
+                        // """, returnStdout: true).trim()
+                        
+                        // // 使用 sed 更新 deployment.yaml 中的时间戳
+                        // sh """
+                        //     sed -i "s/manual restart at ${oldCurrent}/manual restart at ${newCurrent}/g" argocd-apps/charts/${env.PROJ}/${env.PROJ_ITEM}/templates/deployment.yaml
+                        // """
+                        
+                        // // 设置提交消息
+                        // env.MESSAGE = "manual restart at ${newCurrent}  last time manual restart at ${oldCurrent}"
+                        env.NEED_COMMIT = "true"
+                    } else {
+                        // 否则更新版本号
+						echo "更新版本号"
+                        def oldVersion = sh(script: """
+                            grep -oP 'tag:\\s*\"\\K[^"]+' ${DATA_PATH}/argocd-apps/charts/${env.PROJ}/${env.PROJ_ITEM}/values.yaml
+                        """, returnStdout: true).trim()
+
+                        
+                        // 如果版本没有变化，则退出
+                        if (oldVersion == env.NEW_VERSION) {
+                            echo "The version has not changed, exiting!"
+                            currentBuild.result = 'SUCCESS'
+                            return
+                        }
+
+                        // 更新版本号
+                        // sh """
+                        //     sed -i "s/  tag: .*/  tag: \\"${env.NEW_VERSION}\\"/g" argocd-apps/charts/${env.PROJ}/${env.PROJ_ITEM}/values.yaml
+                        // """
+                        
+                        // 设置提交消息
+                        //env.MESSAGE = "Update file ${env.PROJ} ${env.PROJ_ITEM} values.yaml image tag ${env.NEW_VERSION}, Time: $(date +'%F %T')."
+                        env.NEED_COMMIT = "true"
+                    }
+                }
+            }
+        }
+        stage('提交更改并推送') {
+            when {
+                expression { return env.NEED_COMMIT == 'true' } // 只有在有更改时才执行
+            }
+            steps {
+                script {
+                    // 提交更改并推送到 Git
+					echo "提交"
+                    // dir('/data/k8s/ppu-k8s-platform') {
+                    //     sh """
+                    //         git add .
+                    //         git commit -m "${env.MESSAGE}"
+                    //         git push origin ${env.GIT_BRANCH}
+                    //     """
+                    // }
+                }
+            }
+        }
+
+		}
+}

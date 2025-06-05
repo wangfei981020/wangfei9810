@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app.kubernetes.io/name: argocd-cli
+  name: argocd-cli
+spec:
+  serviceAccountName: argocd-server
+  containers:
+  - name: argocd-cli
+    image: amazon/aws-cli
+    command: [ "/bin/bash", "-c", "sleep 5000" ]

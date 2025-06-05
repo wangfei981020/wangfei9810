@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: mongodb
+  namespace: g101-prod
+spec:
+  gateways:
+  - istio-system/g101-istio-ingressgateway-inner
+  hosts:
+    - mongodb.g101-prod.com
+  tcp:
+  - match:
+    - port: 27017
+    route:
+    - destination:
+        host: mongodb.g101-prod.svc.cluster.local
+        port:
+          number: 27017

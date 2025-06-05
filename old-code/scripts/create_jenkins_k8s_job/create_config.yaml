@@ -1,0 +1,17 @@
+jenkins:
+  project_name: g34
+  env: uat
+  jenkins_uat: https://uat-jenkins.slleisure.com
+  jenkins_prod: https://jk.slleisure.com
+  username: cesar
+  password: cesar-526
+  # UAT 模板
+  source_job_name: k8s-template_jenkins_job
+  # view_name: PPU-K8S-G35-UAT
+  view_name: test02
+
+
+harbor:
+  url: https://harbor.slleisure.com
+  username: cesar
+  password: Cesar-526

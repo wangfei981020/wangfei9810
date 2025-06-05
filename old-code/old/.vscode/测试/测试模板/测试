@@ -1,0 +1,90 @@
+set +x
+proj_item=$(echo $selected_value | cut -d':' -f1)
+new_version=$(echo $selected_value | cut -d':' -f2)
+echo $proj_item
+echo $new_version
+proj="g101-uat"
+
+
+cd /data/k8s/ppu-k8s-platform && git pull
+git_path="argocd-apps/charts/${proj}/${proj_item}"
+
+
+if [[ $only_restart == "true" ]]
+then
+echo "The user only selected Restart service"
+new_current=`date "+%Y-%m-%d %H:%M:%S"`
+old_current=$(grep -oP '\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}' ${git_path}/templates/deployment.yaml  || echo "error")
+echo $old_current
+if [[ "$old_current" != "error" ]]
+then
+echo "there"
+sed -i "s/manual restart at $old_current/manual restart at ${new_current}/g" ${git_path}/templates/deployment.yaml
+message="manual restart at $new_current  last time manual restart at $old_current"
+else
+ message="No manual update related annotations are configured"
+fi
+echo $message
+else
+echo "The user chooses to upgrade the version to ${new_version}"
+old_version=$(grep -oP 'tag:\s*"\K[^"]+' ${git_path}/values.yaml)
+[[ ${old_version} = ${new_version} ]] && echo "The version has not changed, exit!" && exit 0 
+sed -i "s/  tag: .*/  tag: \"${new_version}\"/g" ${git_path}/values.yaml
+message="Update file ${proj}  ${proj_item} values.yaml image tag ${new_version}, Time: $(date +"%F %T")."
+fi
+
+
+
+git add .
+git commit -m "$message"
+git push origin main
+
+echo "Build triggered by: $BUILD_USER"
+argocd=${proj_item}-${proj}
+echo "111 ${argocd}"
+USERNAME=$(echo $ARGOCD_CREDENTIALS | cut -d':' -f1)
+echo "222 ${USERNAME} --"
+PASSWORD=$(echo $ARGOCD_CREDENTIALS | cut -d':' -f2)
+argocd login ppu-argocd-jenkins.slleisure.com  --username $USERNAME --password $PASSWORD --grpc-web
+argocd app sync ${argocd}
+sync_status=$(argocd app get ${argocd} -o json --grpc-web | jq -r '.status.sync.status')
+MAX_RETRIES=10
+RETRY_COUNT=0
+if [ "$sync_status" == "Synced" ]; then
+    echo "ArgoCD sync was successful."
+    set +e
+    
+    while true; do
+      # 获取 Pod 状态
+      STATUS=$(argocd app get ${argocd} -o json | jq -r '.status.resources[] | select(.kind=="Deployment") | .health.status')
+    
+      # 如果 Pod 状态不为 Progressing，则检查是否为 Healthy 或 Degraded
+      if [[ "$STATUS" != "Progressing" ]]; then
+        if [[ "$STATUS" == "Healthy" ]]; then
+          echo "Pod启动成功！"
+          break
+        elif [[ "$STATUS" == "Degraded" ]]; then
+          echo "Pod启动失败！"
+          break
+        fi
+      fi
+    
+      # 如果 Pod 状态是 Progressing，输出“正在同步中”
+      if [[ "$STATUS" == "Progressing" ]]; then
+        echo "Pod正在同步中..."
+        
+        # 如果已经连续检查了 10 次仍然处于 Progressing 状态，则输出更新失败并退出循环
+        ((RETRY_COUNT++))
+        if [[ $RETRY_COUNT -ge $MAX_RETRIES ]]; then
+          echo "更新失败，Pod状态仍然是 Progressing！"
+          break
+        fi
+      fi
+    
+      # 等待一段时间后再检查
+      sleep 10
+      done
+else
+  echo "ArgoCD sync failed."
+  exit 1
+fi

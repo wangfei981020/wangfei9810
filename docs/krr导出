@@ -1,0 +1,9 @@
+python krr.py simple -n g32-admin -f csv --fileoutput /home/cesar/csv/kk-admin.csv 
+python krr.py simple -n g32-base -f csv --fileoutput /home/cesar/csv/kk-base.csv 
+python krr.py simple -n g32-bet-settle -f csv --fileoutput /home/cesar/csv/kk-bet-settle.csv 
+python krr.py simple -n g32-game -f csv --fileoutput /home/cesar/csv/kk-game.csv
+python krr.py simple -n g32-game-center -f csv --fileoutput /home/cesar/csv/kk-game-center.csv 
+python krr.py simple -n g32-merchant -f csv --fileoutput /home/cesar/csv/kk-merchant.csv
+python krr.py simple -n g32-openapi -f csv --fileoutput /home/cesar/csv/kk-openapi.csv 
+python krr.py simple -n g32-user -f csv --fileoutput /home/cesar/csv/g32-user.csv 
+python krr.py simple -n g32-wallet -f csv --fileoutput /home/cesar/csv/kk-wallet.csv 

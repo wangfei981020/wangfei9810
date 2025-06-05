@@ -1,0 +1,49 @@
+{{- if .IsRecovered }}
+✅ **Alert Recovered**  
+{{- if .GroupName }}
+**Alert Project:** {{.GroupName}}
+{{- end }}
+**Status Level:** S{{.Severity}} Recovered  
+**Alert Name:** {{.RuleName}}  
+{{- if .TagsMap.namespace }}
+**Namespace:** {{ .TagsMap.namespace }}
+{{- end }}
+
+{{- if .TagsMap.container }}
+**Container:** {{ .TagsMap.container }}
+{{- end }}
+
+**Instance:** {{ if .TargetIdent }}{{ .TargetIdent }}{{ else }}{{ .AnnotationsJSON.instance }}{{ end }}  
+**Recovery Time:** {{ timeformat .LastEvalTime }}  
+**Alert Description:** **Service has been restored**  
+
+{{- else }}
+🔴 **Alert Triggered**  
+{{- if .GroupName }}
+**Alert Project:** {{.GroupName}}
+{{- end }}
+**Status Level:** S{{.Severity}} Triggered  
+**Alert Name:** {{.RuleName}}  
+{{- if .TagsMap.namespace }}
+**Namespace:** {{ .TagsMap.namespace }}
+{{- end }}
+
+{{- if .TagsMap.container }}
+**Container:** {{ .TagsMap.container }}
+{{- end }}
+
+{{- if .TagsMap.tid }}
+**Tid:** {{ .TagsMap.tid }}
+**Exception:** {"code":"{{ .TagsMap.code }}","msg":"{{ .TagsMap.msg }}."}
+{{- end }}
+
+{{ if .TargetIdent }}
+**Instance:** {{ if .TargetIdent }}{{ .TargetIdent }}{{ else }}{{ .AnnotationsJSON.instance }}{{ end }}  
+{{ end }}  
+**Trigger Time:** {{ timeformat .TriggerTime }}  
+**Send Time:** {{ timestamp }}  
+**Trigger Value:** {{.TriggerValue}}  
+{{- if .RuleNote }}
+**Alert Description:** **{{.RuleNote}}**  
+{{- end }}
+{{- end }}

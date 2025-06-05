@@ -1,0 +1,37 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: doris-fe-servicemonitor
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: fe
+  namespaceSelector:
+    matchNames:
+      - doris
+  endpoints:
+    - port: http-port
+      path: /metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: doris-be-servicemonitor
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: be
+  namespaceSelector:
+    matchNames:
+      - doris
+  endpoints:
+    - port: webserver-port
+      path: /metrics
+      interval: 30s

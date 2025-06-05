@@ -1,0 +1,4 @@
+kubectl create secret tls g35-prod-com-cert \
+  --cert=g35-prod.com.crt \
+  --key=g35-prod.com.key \
+  --namespace=istio-system

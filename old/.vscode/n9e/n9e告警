@@ -1,0 +1,19 @@
+
+(up{job!='openvpn-app',env="prod",project='g22',tier='app'}) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"} == 0
+
+// #异常
+((node_filesystem_avail_bytes{env='prod',project='g22',tier='app'} * 100) / node_filesystem_size_bytes{env='prod',project='g22',tier='app'} < 10 and ON (instance, device, mountpoint) node_filesystem_readonly{env='prod',project='g22',tier='app'}) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+
+
+// 正常 
+(
+  (up{job!='openvpn-app', env="prod", project='g22', tier='app'} < 1 
+    and ON(instance) up{job!='openvpn-app', env="prod", project='g22', tier='app'})
+  * on(instance) group_left(nodename) 
+  node_uname_info{nodename=~".+"}
+)
+ or
+(
+  up{job!='openvpn-app', env="prod", project='g22', tier='app'} < 1
+  and on(instance) label_replace(up{job!='openvpn-app', env="prod", project='g22', tier='app'}, "nodename", "none", "nodename", ".*")
+)

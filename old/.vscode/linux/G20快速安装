@@ -1,0 +1,6 @@
+### 同步 nginx 配置文件
+ansible-playbook /etc/ansible/G20/G20-prod-nginx-config.yaml --limit G20-nginx  --diff 
+### 安装 nginx 
+ansible-playbook -i /etc/ansible/ProjConfigure/hosts installOpenResty.yaml --extra-vars "hosts=g20-nginx" --limit g20-nginx  --diff  
+ansible-playbook -i /etc/ansible/ProjConfigure/hosts installOpenResty.yaml --limit g20-nginx  --diff 
+ansible -i  /etc/ansible/inventory/g20 G20-nginx -m shell -a "/usr/bin/nginx -t"

@@ -1,0 +1,116 @@
+10.161.32.5 g18-clustermgr
+10.161.32.11  g18-frontend-layer
+10.161.32.10 g18-game
+10.161.32.9 g18-goproxy
+10.161.32.8 G18-UAT-java
+10.161.32.6 g15-logsvr
+10.161.32.7 g18-nacos
+
+nacos.devops:8848
+
+
+
+
+apt-get update
+apt-get install -y vim
+
+
+location ~* ^/(api) {
+    rewrite ^/api/(.+?)$ /$1 break;  # 将 /api/login 重写为 /login
+    proxy_pass   http://analysis-backend:8080; 
+    proxy_set_header Host      $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
+
+curl -X POST -d "username=admin&password=123456" http://analysis-backend:8080/api/login
+
+# 使用基本认证
+curl -u admin:123456 http://analysis-backend:8080/api/login
+
+# 使用表单数据
+curl -X POST -d "username=admin&password=123456" http://analysis-backend:8080/api/login
+curl -X POST -d "username=admin&password=123456" http://analysis-backend:8080/login
+
+# 使用 JSON 数据
+curl -X POST -H "Content-Type: application/json" -d '{"username":"admin","password":"123456"}' http://analysis-backend:8080/api/login
+curl -X POST -H "Content-Type: application/json" -d '{"username":"admin","password":"123456"}' http://analysis-backend:8080/login
+
+
+curl -X POST "http://analysis-backend:8080/login" -H "Request-Origion:SwaggerBootstrapUi" -H "accept:*/*" -H "Content-Type:application/json" -d "{\"password\":\"123456\",\"userName\":\"admin\"}"
+
+
+
+nacos.naming.timeout=5000
+nacos.config.timeout=5000
+
+nacos.devops:8848
+curl -X GET "http://nacos.devops:8848/nacos/v1/console/namespaces"
+curl -u nacos:nacos -X GET "http://nacos.devops:8848/nacos/v1/console/namespaces"
+
+https://ppu-nacos.slleisure.com/nacos/v1/console/namespaces
+
+docker create --name temp-container harbor.slleisure.com/g29/data-server-api-backend:20241009065458-640c69c-15
+docker cp temp-container:/app.jar /tmp/1111/app.jar
+
+META-INF/MANIFEST.MF
+
+
+
+G22_CMS
+10-9  748M
+10-10 185M
+G22_GateSvr * 8  9G
+10-9  1.1G
+10-10 320M
+G22_WALLET * 14  70G
+
+10-9 5G
+10-10 1.3G
+
+
+
+kubectl get sidecar -n <namespace> -o yaml
+kubectl get namespace g18-uat -L istio-injection
+
+
+G04_retrysvr_go
+
+rsync -avz files@10.146.40.160::G04_retrysvr_go /data/g13/G13_retrysvr_go/ --password-file=/root/rsync.password
+10.147.8.8
+
+G18 后台
+https://g18-agent-web.g18-prod.com/
+G20后台
+https://agent-web.g20-prod.com
+G20 Gli 后台
+https://agent-web.g20gli.com
+
+
+
+k8s-agent-office.g18-prod.com
+
+k8s-agent-web.g18-prod.com
+k8s-anchor-web.g18-prod.com
+k8s-manage-web.g18-prod.com
+k8s-auth-api.g18-prod.com
+k8s-gci-gateway.g18-prod.com
+k8s-gci-web.g18-prod.com
+k8s-gi-dc.g18-prod.com
+k8s-gi-gd.g18-prod.com
+k8s-goodway.g18-prod.com
+
+k8s-nacos
+
+多个域名
+k8s-agent-web.g18-prod.com
+k8s-anchor-web.g18-prod.com
+k8s-gci-gateway.g18-prod.com
+k8s-gi-gd.g18-prod.com
+k8s-goodway.g18-prod.com
+k8s-manage-web.g18-prod.com
+
+单个域名
+k8s-auth-api.g18-prod.com
+k8s-gi-dc.g18-prod.com
+k8s-gci-web.g18-prod.com

@@ -1,0 +1,20 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: request-metrics
+spec:
+  metrics:
+  - providers:
+    - name: prometheus
+    overrides:
+    - match:
+        metric: REQUEST_COUNT
+      tagOverrides:
+        request_path:  
+          value: "request.path"
+        request_host:
+          value: "request.host"
+        request_method:
+          value: "request.method"
+        # request_duration:
+        #   value: "request.duration"

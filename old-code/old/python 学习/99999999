@@ -1,0 +1,8 @@
+ansible-playbook /home/cesar/jenkins/G20-game-client-h5.yaml -e "deploy_version=uat-0.1.0.134" -e "host_list=G20-game-client-h5.yaml"--diff --check -vv 
+ansible-playbook -i g20-uat-hosts /home/cesar/jenkins/G20-game-client-h5.yaml -e "deploy_version=uat-0.1.0.134" -e "host_list=g20-uat-game-client-h5-test" -e "source_path=/data/vcs/g20/tidb/G20-game-client-h5" -e "deploy_path=/home/centos/g20-uat/G20-game-client/h5/" --diff --check -vv
+
+ansible-playbook /home/cesar/jenkins/G20-game-client-h5.yaml -e "deploy_version=$deploy_version" --diff
+ansible-playbook /etc/ansible/G20/G20-prod-nginx-config.yaml --limit G20-nginx --check --diff -vv 
+
+
+

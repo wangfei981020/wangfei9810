@@ -1,0 +1,242 @@
+pipeline {
+  agent {
+    kubernetes {
+      inheritFrom 'nodejs base'
+      containerTemplate {
+        name 'nodejs'
+        image 'dev-harbor.slleisure.com/basedependency/gcc-4.9.4'
+      }
+    }
+  }
+  parameters {
+    string(name: 'GIT_URL', defaultValue: 'http://gitlabdev.solidleisure.com:5999/idp/idp_server/g31product.git', description: 'Git repository URL')
+    string(name: 'PROJECT', defaultValue: 'g31-dev', description: 'Project')
+    string(name: 'REGISTRY', defaultValue: 'dev-harbor.slleisure.com', description: 'Docker registry URL')
+    string(name: 'APP_NAME', defaultValue: 'CenterSvr', description: 'Application name')
+  }
+  environment {
+    PROJECT_NAME = "${params.APP_NAME.toLowerCase()}-backend"
+    NEW_PROJECT_NAME = "g31-${PROJECT_NAME}"
+  }
+  stages {
+    stage('拉取源代码') {
+      agent none
+      steps {
+        sh 'git config --global http.sslVerify false'
+        // 拉取 g31product 仓库
+        dir('g31product') {
+          git(url: "${params.GIT_URL}", credentialsId: 'g31-git-cpp-id', branch: 'dev', changelog: true, poll: false)  }// 指定 dev 分支
+        
+        // 拉取 basekernel 仓库，并切换到 master 分支
+        dir('BaseKernel') {
+          git(url: 'http://gitlabdev.solidleisure.com:5999/idp/idp_server/basekernel.git', credentialsId: 'g31-git-cpp-id', branch: 'master', changelog: true, poll: false)
+        }
+      }
+    }
+
+    stage('编译') {
+      agent none
+      steps {
+        container('nodejs') {
+          sh '''
+            cd BaseKernel &&
+            cmake CMakeLists.txt && 
+            make &&
+            cd ../ &&
+            cp -ra BaseKernel g31product/ &&
+            cd g31product/$APP_NAME &&
+            rm -rf build/Debug &&
+            mkdir -p build/Debug && 
+            cd build/Debug &&
+            cmake ../../ &&
+            make -j4 
+          '''
+        }
+      }
+    }
+
+    stage('构建并推送镜像') {
+      agent none
+      steps {
+        script {
+          env.TIMESTAMP = sh(returnStdout: true, script: 'date +%Y%m%d%H%M%S').trim()
+          env.DOCKER_TAG = "${TIMESTAMP}-${BUILD_NUMBER}"
+        }
+
+        container('base') {
+          sh '''cat > $APP_NAME.xml <<EOF
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<config>
+
+  <listen_ports>
+    <port name="game"   port="6100"/>
+    <!--服务器监听端口-->
+    <port name="op"     port="7100"/>
+    <!--操盘端监听端口-->
+    <port name="rpc" port="8100"/>
+    <!--RPC监听端口-->
+  </listen_ports>
+
+  <common iopool_size="5" ident="G13_CMS_DEV"/>
+  <log_svr   host = "10.146.40.92"  port="0"/>
+  <!--日志服务器地址-->
+  <db_conn  value="Provider=TiDB;Data Source=10.141.1.6:4000/g31_game;User Id=root;Password=Bb-36DVt58yp@2Q1^_;"/>
+  
+  <gamewalletlist>
+    <!--gamewallet host="127.0.0.1" port="9000" id="CenterSvr" pwd="1001"-->
+  </gamewalletlist>
+  
+  <cms gametype="BLRE"/>
+</config>
+EOF'''
+          sh '''cat > Dockerfile <<EOF
+# 使用 Alpine 镜像作为基础镜像
+FROM alpine:3.17
+
+# 安装运行 C++ 程序所需的运行时库（例如 libstdc++）
+RUN apk add --no-cache libstdc++
+
+# 创建工作目录
+WORKDIR /app
+
+# 将本地编译好的 C++ 程序文件复制到容器内
+COPY ./g31product/$APP_NAME/bin/linux/Release/$APP_NAME /app/$APP_NAME
+COPY ./$APP_NAME.xml /app/$APP_NAME.xml
+
+# 设置容器启动时运行 C++ 程序
+CMD ["/app/$APP_NAME"]
+
+EOF'''
+          sh 'podman build -f Dockerfile -t $REGISTRY/$PROJECT/$NEW_PROJECT_NAME:$DOCKER_TAG .'
+          withCredentials([usernamePassword(credentialsId : 'harbor-id' ,passwordVariable : 'DOCKER_PASSWORD' ,usernameVariable : 'DOCKER_USERNAME' ,)]) {
+            sh 'echo "$DOCKER_PASSWORD" | podman login $REGISTRY -u "$DOCKER_USERNAME" --password-stdin'
+            sh 'podman push $REGISTRY/$PROJECT/$NEW_PROJECT_NAME:$DOCKER_TAG'
+          }
+        }
+      }
+    }
+
+    stage('部署到 dev 环境') {
+      agent none
+      steps {
+        container('base') {
+          sh '''cat > deployment.yaml <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $NEW_PROJECT_NAME
+  namespace: $PROJECT
+  labels:
+    app: $NEW_PROJECT_NAME
+spec:
+  replicas: $POD_REPLICAS
+  selector:
+    matchLabels:
+      app: $NEW_PROJECT_NAME
+  template:
+    metadata:
+      labels:
+        app: $NEW_PROJECT_NAME
+    spec:
+      imagePullSecrets:
+        - name: harbor-id
+      containers:
+        - name: $NEW_PROJECT_NAME
+          image: $REGISTRY/$PROJECT/$NEW_PROJECT_NAME:$DOCKER_TAG
+          lifecycle:
+            #set prestop hook
+            preStop:
+              exec:
+                command: [ "curl", "-X POST", "127.0.0.1:8088/actuator/shutdown" ]
+          ports:
+            - name: tcp-8080
+              containerPort: 8080
+              protocol: TCP
+            - name: tcp-8088
+              containerPort: 8088
+              protocol: TCP
+          env:
+            #nacos配置
+            - name: REGISTER_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: nacos
+                  key: REGISTER_HOST
+            - name: NAMESPACE
+              valueFrom:
+                secretKeyRef:
+                  name: nacos
+                  key: NAMESPACE
+            - name: REGISTER_USER
+              valueFrom:
+                secretKeyRef:
+                  name: nacos
+                  key: REGISTER_USER
+            - name: REGISTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nacos
+                  key: REGISTER_PASSWORD
+
+          #探针检测
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8088
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8088
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: $NEW_PROJECT_NAME
+    micrometer-prometheus-discovery: 'true'
+  name: $NEW_PROJECT_NAME-svc
+  namespace: $PROJECT
+spec:
+  ports:
+    - name: tcp-8080
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: $NODE_PORT
+    - name: metrics
+      protocol: TCP
+      port: 8088
+      targetPort: 8088
+      nodePort: $METRICS_PORT
+  selector:
+    app: $NEW_PROJECT_NAME
+  type: NodePort
+
+EOF'''
+
+          sh 'kubectl version --client'
+          withCredentials([kubeconfigContent(credentialsId : 'kubeconfig-id' ,variable : 'KUBECONFIG' ,)]) {
+            sh '''
+              set +x
+              mkdir ~/.kube
+              echo "$KUBECONFIG" > ~/.kube/config
+            '''
+          }
+
+          sh 'kubectl cluster-info'
+          sh 'kubectl apply -f deployment.yaml'
+        }
+      }
+    }
+  }
+}

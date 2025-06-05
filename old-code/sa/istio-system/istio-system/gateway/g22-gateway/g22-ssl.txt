@@ -1,0 +1,4 @@
+kubectl create secret tls g22-prod-com-cert \
+  --cert=g22-prod.com.crt \
+  --key=g22-prod.com.key \
+  --namespace=istio-system

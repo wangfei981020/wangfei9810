@@ -1,0 +1,32 @@
+IAM 路由
+
+- AmazonEKSMasterRoles  // Master IAM 权限
+  - AmazonEKS_CNI_Policy
+  - AmazonEKSServicePolicy
+  - AmazonEKSWorkerNodePolicy
+
+- AmazonEKSNodeRoles // Node IAM 权限
+  - AmazonEC2ContainerRegistryReadOnly
+  - AmazonEKS_CNI_Policy
+  - AmazonEKSWorkerNodePolicy
+  -AmazonSSMManagedInstanceCore
+
+- AmazonEKSClusterRoles  // Cluster IAM 权限
+  - AmazonEKSClusterPolicy
+
+- AmazonEKS_EBS_CSI_DriverRole_my-cluster-name // EBS 驱动IAM权限
+  - AmazonEBSCSIDriverPolicy
+
+
+
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/v0.124.0/eksctl_Linux_amd64.tar.gz" -o /tmp/eksctl.tar.gz
+tar -xzvf /tmp/eksctl.tar.gz -C /tmp
+sudo mv /tmp/eksctl /usr/bin/eksctl 
+
+
+eksctl get iamidentitymapping --cluster cesar-test-cluster-01 --region=ap-east-1
+eksctl create iamidentitymapping --cluster cesar-test-cluster-01 --region=ap-east-1 --arn arn:aws:iam::058264270351:role/AmazonEKSMasterRoles --group system:masters --no-duplicate-arns --username system:node:ip-10-194-232-209.ap-east-1.compute.internal
+eksctl get iamidentitymapping --cluster cesar-test-cluster-01 --region=ap-east-1
+
+
+aws eks update-kubeconfig --region ap-east-1 --name cesar-test-cluster-01 

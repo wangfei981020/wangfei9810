@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.doris.ownerreference/name: g32-prod-doriscluster
+    app.doris.service/role: access
+    app.kubernetes.io/component: fe
+    statefulset.kubernetes.io/pod-name: g32-prod-doriscluster-fe-0
+  name: doris-ui
+  namespace: doris
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http-port
+    port: 8030
+    protocol: TCP
+    targetPort: 8030
+  selector:
+    app.doris.ownerreference/name: g32-prod-doriscluster-fe
+    app.kubernetes.io/component: fe
+    statefulset.kubernetes.io/pod-name: g32-prod-doriscluster-fe-0
+  sessionAffinity: ClientIP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.doris.ownerreference/name: g32-prod-doriscluster
+    app.doris.service/role: access
+    app.kubernetes.io/component: be
+    statefulset.kubernetes.io/pod-name: g32-prod-doriscluster-be-0
+  name: doris-be-0
+  namespace: doris
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: webserver-port
+    port: 8040
+    protocol: TCP
+    targetPort: 8040
+  selector:
+    app.doris.ownerreference/name: g32-prod-doriscluster-be
+    app.kubernetes.io/component: be
+    statefulset.kubernetes.io/pod-name: g32-prod-doriscluster-be-0
+  sessionAffinity: ClientIP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.doris.ownerreference/name: g32-prod-doriscluster
+    app.doris.service/role: access
+    app.kubernetes.io/component: be
+    statefulset.kubernetes.io/pod-name: g32-prod-doriscluster-be-1
+  name: doris-be-1
+  namespace: doris
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: webserver-port
+    port: 8040
+    protocol: TCP
+    targetPort: 8040
+  selector:
+    app.doris.ownerreference/name: g32-prod-doriscluster-be
+    app.kubernetes.io/component: be
+    statefulset.kubernetes.io/pod-name: g32-prod-doriscluster-be-1
+  sessionAffinity: ClientIP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.doris.ownerreference/name: g32-prod-doriscluster
+    app.doris.service/role: access
+    app.kubernetes.io/component: be
+    statefulset.kubernetes.io/pod-name: g32-prod-doriscluster-be-2
+  name: doris-be-2
+  namespace: doris
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: webserver-port
+    port: 8040
+    protocol: TCP
+    targetPort: 8040
+  selector:
+    app.doris.ownerreference/name: g32-prod-doriscluster-be
+    app.kubernetes.io/component: be
+    statefulset.kubernetes.io/pod-name: g32-prod-doriscluster-be-2
+  sessionAffinity: ClientIP
+  type: ClusterIP

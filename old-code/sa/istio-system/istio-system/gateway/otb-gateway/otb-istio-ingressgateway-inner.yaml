@@ -1,0 +1,29 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: otb-istio-ingressgateway-inner
+  namespace: istio-system
+spec:
+  selector:
+    istio: otb-istio-ingressgateway-inner
+  servers:
+  - hosts:
+    - '*.slleisure.com'
+    port:
+      name: http2
+      number: 80
+      protocol: HTTP
+    tls:
+      httpsRedirect: false
+
+  - hosts:
+    - '*.slleisure.com'
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: slleisure-com-cert
+      minProtocolVersion: TLSV1_2
+

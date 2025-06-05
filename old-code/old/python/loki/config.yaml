@@ -1,0 +1,5 @@
+loki_url: "http://ppu-loki.slleisure.com/loki/api/v1/query_range"
+#loki_url: "http://loki.g32-prod.com/loki/api/v1/query_range"
+containers:
+  - namespace: g32-uat
+    container: message-client-backend

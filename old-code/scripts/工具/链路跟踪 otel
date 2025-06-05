@@ -1,0 +1,10 @@
+# 需要调试 开启调试日志
+
+# For example, {{ REDACTED_EMAIL }} becomes {{` {{ REDACTED_EMAIL }} `}}.
+config:
+  exporters:
+    # debug: {}
+    debug: 
+       verbosity: detailed
+
+  https://opentelemetry.io/zh/docs/collector/configuration/#exporters

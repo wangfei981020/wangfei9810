@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: doris-nginx
+  name: doris-nginx
+  namespace: doris
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "doris-nginx"
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "doris-nginx"
+    spec:
+      containers:
+      - image: harbor.slleisure.com/library/doris-nginx
+        name: doris-nginx
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 100m
+            memory: 256Mi
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: doris-nginx
+  name: doris-nginx
+  namespace: doris
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http-port
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app.kubernetes.io/name: doris-nginx
+  sessionAffinity: ClientIP
+  type: ClusterIP

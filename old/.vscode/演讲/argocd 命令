@@ -1,0 +1,38 @@
+# argocd 创建 模板
+
+cd /data/helm/ppu-k8s-platform/argocd-apps/charts/g101-uat-apps
+
+
+
+argocd login ppu-argocd.slleisure.com --username admin --password <admin-password> --insecure
+argocd login localhost:8080 --username admin --grpc-web --insecure
+
+kubectl port-forward svc/argocd-server -n argocd 8080:443 
+
+argocd account update-password --account jenkins --new-password 
+
+Generate token for automation account (for GitlabCI ARGOCD_AUTH_TOKEN variable)
+```
+argocd account generate-token --account jenkins --grpc-web
+helm upgrade -n argocd -f values.yaml argocd argo/argo-cd --version 7.4.3
+
+# 查看同步状态和健康状态
+argocd app get gci-api-backend-g101-uat
+
+
+
+kubectl port-forward svc/devops-agent-argocd-server -n argocd --address 0.0.0.0 30022:80
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d
+
+kubectl port-forward svc/devops-jenkins -n kubesphere-devops-system --address 0.0.0.0 30022:80
+
+kubectl -n kubesphere-devops-system get secret devops-jenkins -o jsonpath='{.data.jenkins-admin-password}' | base64 -d
+
+
+kubectl create deployment nginx --image=nginx
+kubectl get deployment nginx -o yaml > nginx-deployment.yaml
+
+kubectl create deployment nginx --image=nginx --dry-run=client -o yaml > nginx-deployment.yaml
+
+
+

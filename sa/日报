@@ -1,0 +1,23 @@
+03-24
+UAT 部署 OpenTelemetry
+G101 UAT 传统环境到K8S网络权限开通
+域名https://project-mgmt.slleisure.com:8900/#/  加白开发ip
+G31可用性测试
+赛亚人开发服务器创建初始化相关工作
+在G01 AWS账号开设服务器并部署文件上传服务器
+G16 GLI LB 加白 无影云出口Ip
+G31 UAT LB 加白 无影云出口Ip
+Lark流程添加G09新的人员
+G32监控G01维护状态
+uat环境 G01那边访问G32的 openapi-gateway.g32-uat.com 403
+G101 GLI 创建LB 
+G101 GLI 传统服务监控
+g101/uat/gli-cicd调整
+所有项目夜莺告警规则检查及配置
+
+
+03-31
+
+
+开发环境流水线迁移
+关闭 gke 自动升级

@@ -1,0 +1,118 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: doris-ui
+  namespace: doris
+spec:
+  gateways:
+  - istio-system/g32-istio-ingressgateway-inner
+  hosts:
+    - doris-ui.g32-prod.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        #host: g32-prod-doriscluster-fe-service.doris.svc.cluster.local
+        host: doris-ui.doris.svc.cluster.local
+        port:
+          number: 8030
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: doris-8030
+  namespace: doris
+spec:
+  gateways:
+  - istio-system/g32-istio-ingressgateway-inner
+  hosts:
+    - doris.g32-prod.com
+  tcp:
+  - match:
+    - port: 8030
+    route:
+    - destination:
+        host: g32-prod-doriscluster-fe-service.doris.svc.cluster.local
+        port:
+          number: 8030
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: doris-9030
+  namespace: doris
+spec:
+  gateways:
+  - istio-system/g32-istio-ingressgateway-inner
+  hosts:
+    - doris.g32-prod.com
+  tcp:
+  - match:
+    - port: 9030
+    route:
+    - destination:
+        host: g32-prod-doriscluster-fe-service.doris.svc.cluster.local
+        port:
+          number: 9030
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: doris-be-0
+  namespace: doris
+spec:
+  gateways:
+  - istio-system/g32-istio-ingressgateway-inner
+  hosts:
+  - doris-be-0.g32-prod.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: doris-be-0.doris.svc.cluster.local
+        port:
+          number: 8040
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: doris-be-1
+  namespace: doris
+spec:
+  gateways:
+  - istio-system/g32-istio-ingressgateway-inner
+  hosts:
+  - doris-be-1.g32-prod.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: doris-be-1.doris.svc.cluster.local
+        port:
+          number: 8040
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: doris-be-2
+  namespace: doris
+spec:
+  gateways:
+  - istio-system/g32-istio-ingressgateway-inner
+  hosts:
+  - doris-be-2.g32-prod.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: doris-be-2.doris.svc.cluster.local
+        port:
+          number: 8040

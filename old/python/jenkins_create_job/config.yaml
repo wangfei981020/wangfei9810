@@ -1,0 +1,17 @@
+projects:
+  project_name: 'g31'
+  env: 'uat'
+  jenkins_uat: 'https://uat-jenkins.slleisure.com'
+  jenkins_gli: 'https://uat-jenkins.slleisure.com'
+  jenkins_prod: 'https://jk.slleisure.com'
+  username: 'cesar'
+  password: 'cesar-526'
+  # source_job_name: 'k8s-g29_analysis-admin-frontend' 
+  # source_job_name: 'G32-restart-test' 
+  # source_job_name: 'k8s-test_agent-api-backend111' 
+  # source_job_name: 'k8s-test_agent-api-backend_other' 
+  source_job_name: 'k8s-test_agent-api-backend-g32-test-test-curl' 
+  source_job_name: 'k8s-template_jenkins_job' 
+  # 目标视图的名称        
+  view_name: 'test02'
+  # view_name: 'PPU-K8S-G31-UAT'

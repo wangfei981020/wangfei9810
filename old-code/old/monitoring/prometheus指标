@@ -1,0 +1,77 @@
+# 这个指标更能反映容器的实际内存需求，即它真正需要的内存量，不包括被回收的内存部分
+container_memory_working_set_bytes
+
+#这个指标更能反映容器的总内存使用情况，包括了容器的缓存、文件系统缓存等其他内存消耗。
+container_memory_usage_bytes
+
+# 获取pod 的 limits 
+kube_pod_container_resource_limits
+
+
+# 获取容器 pod 占用limit内存使用的百分比
+(sum(
+  container_memory_working_set_bytes{container=~".*", namespace=~".*", } 
+) by (container,pod)
+/
+sum(
+  kube_pod_container_resource_limits{container=~".*", namespace=~".*", resource="memory"} 
+) by (container,pod)) * 100
+
+
+
+# 获取 cpu 五分钟使用率 
+rate(container_cpu_usage_seconds_total{container=~".*", namespace=~".*"}[5m])
+
+# 获取 cpu 使用率占用 limmit 百分比
+(sum(rate(container_cpu_usage_seconds_total{container=~".*", namespace=~".*"}[5m])) by (container,pod) / sum(kube_pod_container_resource_limits{resource="cpu",container=~".*",namespace=~".*"} ) by (container,pod)) * 100
+
+
+# 已用cpu
+rate(container_cpu_usage_seconds_total{container=~"$module", namespace=~".*"}[5m])
+{{pod}} - 已用CPU
+
+# 总cpu
+sum(\r\n  kube_pod_container_resource_limits{container=~\"$module\", namespace=~\".*\", resource=\"cpu\"} \r\n) by (container,pod)
+{{pod}} - 总CPU
+
+# cpu 使用率
+(sum(rate(container_cpu_usage_seconds_total{container=~\"$module\", namespace=~\".*\"}[5m])) by (container,pod) / sum(kube_pod_container_resource_limits{resource=\"cpu\",container=~\"$module\",namespace=~\".*\"} ) by (container,pod)) * 100
+{{pod}} - CPU使用率
+
+
+# 已用内存
+sum(\r\n  container_memory_working_set_bytes{container=~\"$module\", namespace=~\".*\", } \r\n) by (container,pod)
+
+{{pod}} - 已用内存
+
+sum(\r\n  kube_pod_container_resource_limits{container=~\"$module\", namespace=~\".*\", resource=\"memory\"} \r\n) by (container,pod)
+{{pod}} - 总内存
+
+(sum(\r\n  container_memory_working_set_bytes{container=~\"$module\", namespace=~\".*\", } \r\n) by (container,pod)\r\n/\r\nsum(\r\n  kube_pod_container_resource_limits{container=~\"$module\", namespace=~\".*\", resource=\"memory\"} \r\n) by (container,pod)) * 100
+{{pod}} - 内存使用率
+
+(sum(container_memory_working_set_bytes{container=~"$module", namespace=~".*", }) by (container,pod) / sum( kube_pod_container_resource_limits{container=~"$module", namespace=~".*", resource="memory"}) by (container,pod)) * 100
+baccarat-resource-backend
+##old 内存
+sum(
+    container_memory_working_set_bytes{container!="", image!=""}
+  * on(namespace,pod)
+    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload="$module"}
+) by (pod)
+/sum(
+    kube_pod_container_resource_requests{job="kube-state-metrics", resource="memory"}
+  * on(namespace,pod)
+    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload="$module"}
+) by (pod)
+
+# old cpu
+sum(
+    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{}
+  * on(namespace,pod)
+    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload="$module"}
+) by (pod)
+/sum(
+    kube_pod_container_resource_requests{job="kube-state-metrics", resource="cpu"}
+  * on(namespace,pod)
+    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload="$module"}
+) by (pod)

@@ -1,0 +1,256 @@
+pipeline {
+  agent {
+    node {
+      label 'jdk21' // 在名为 'jdk21' 的节点上运行流水线
+    }
+  }
+  stages {
+    stage('拉取源代码') {
+      agent none // 不指定 agent，表示该 stage 不会在节点上运行，使用当前工作环境的脚本执行
+      steps {
+        // 配置 Git，禁用 SSL 验证（适用于存在 SSL 问题时）
+        sh 'git config --global http.sslVerify false'
+        
+        // 拉取源代码，使用 GitSCM 插件，拉取指定分支的代码
+        checkout([$class: 'GitSCM', branches: [[name: '$GIT_BRANCH']], doGenerateSubmoduleConfigurations: false, extensions: [[
+                                                                                                                                                                                                                                          $class: 'SubmoduleOption',
+                                                                                                                                                                                                                                          disableSubmodules: false,
+                                                                                                                                                                                                                                          parentCredentials: true,
+                                                                                                                                                                                                                                          recursiveSubmodules: true,
+                                                                                                                                                                                                                                          reference: '',
+                                                                                                                                                                                                                                          trackingSubmodules: false
+                                                                                                                                                                                                                                ]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'git-id', url: '$GIT_URL']]])
+      }
+    }
+
+    stage('构建并推送镜像') {
+      agent none // 不指定 agent，表示该 stage 不会在节点上运行，使用当前工作环境的脚本执行
+      steps {
+        script {
+          // 获取 Git 提交 ID 和时间戳，并设置 Docker 镜像标签
+          env.COMMIT_ID = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
+          env.TIMESTAMP = sh(returnStdout: true, script: 'date +%Y%m%d%H%M%S').trim()
+          env.DOCKER_TAG = "${TIMESTAMP}-${COMMIT_ID}-${BUILD_NUMBER}" // 合成镜像标签
+        }
+
+        container('maven') { // 在 maven 容器中执行以下构建命令
+          // 生成 gradle-wrapper.properties 配置文件
+          sh '''cat > ./$MODULE/gradle/wrapper/gradle-wrapper.properties <<EOF
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=http\\://gradle-85.nginx/gradle-8.5-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+EOF'''
+          
+          // 为 gradlew 文件添加可执行权限并执行构建
+          sh '''chmod +x ./$MODULE/gradlew
+./$MODULE/gradlew clean :$MODULE:build -x test
+ls -alh ./$MODULE/build/libs/*'''
+          
+          // 使用 Podman 构建 Docker 镜像
+          sh 'podman build -f $MODULE/Dockerfile -t $REGISTRY/$PROJECT/$APP_NAME:$DOCKER_TAG .'
+
+          // 登录到 Harbor 注册表并推送镜像
+          withCredentials([usernamePassword(credentialsId : 'harbor-id' ,passwordVariable : 'DOCKER_PASSWORD' ,usernameVariable : 'DOCKER_USERNAME' ,)]) {
+            sh 'echo "$DOCKER_PASSWORD" | podman login $REGISTRY -u "$DOCKER_USERNAME" --password-stdin' // 登录 Harbor
+            sh 'podman push $REGISTRY/$PROJECT/$APP_NAME:$DOCKER_TAG' // 推送镜像到 Harbor
+          }
+        }
+      }
+    }
+
+    stage('部署至 dev 环境') {
+      agent none // 不指定 agent，表示该 stage 不会在节点上运行，使用当前工作环境的脚本执行
+      steps {
+        container('maven') { // 在 maven 容器中执行以下部署命令
+          // 动态生成 Kubernetes Deployment 配置
+          sh '''cat > deployment.yaml <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $APP_NAME
+  namespace: $NAMESPACE
+  labels:
+    app: $APP_NAME
+spec:
+  replicas: $POD_REPLICAS
+  selector:
+    matchLabels:
+      app: $APP_NAME
+  template:
+    metadata:
+      labels:
+        app: $APP_NAME
+    spec:
+      imagePullSecrets:
+        - name: harbor-id
+      containers:
+        - name: $APP_NAME
+          image: $REGISTRY/$PROJECT/$APP_NAME:$DOCKER_TAG
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "curl", "-X POST", "127.0.0.1:8088/actuator/shutdown" ] # 在容器关闭时调用的命令
+          ports:
+            - name: tcp-8080
+              containerPort: 8080
+              protocol: TCP
+            - name: tcp-8088
+              containerPort: 8088
+              protocol: TCP
+          env:
+            - name: REGISTER_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: nacos
+                  key: REGISTER_HOST
+            - name: NAMESPACE
+              valueFrom:
+                secretKeyRef:
+                  name: nacos
+                  key: NAMESPACE
+            - name: TIDB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: wallet-db
+                  key: TIDB_HOST
+            - name: TIDB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: wallet-db
+                  key: TIDB_DATABASE
+            - name: TIDB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: wallet-db
+                  key: TIDB_USERNAME
+            - name: TIDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wallet-db
+                  key: TIDB_PASSWORD
+            - name: UID_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: db
+                  key: UID_HOST
+            - name: UID_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: db
+                  key: UID_DATABASE
+            - name: UID_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db
+                  key: UID_USERNAME
+            - name: UID_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db
+                  key: UID_PASSWORD
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: redis
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: redis
+                  key: REDIS_PORT
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis
+                  key: REDIS_PASSWORD
+            - name: REDIS_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: redis
+                  key: REDIS_DATABASE
+            - name: MQ_NAMESERVER
+              valueFrom:
+                secretKeyRef:
+                  name: rocket-mq
+                  key: MQ_NAMESERVER
+            - name: ENCYRPT_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: encyrpt-salt
+                  key: ENCYRPT_SALT
+
+          # 探针检测
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8088
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8088
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 5
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: $APP_NAME
+    micrometer-prometheus-discovery: 'true'
+  name: $APP_NAME-svc
+  namespace: $NAMESPACE
+spec:
+  ports:
+    - name: tcp-8080
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: $NODE_PORT
+    - name: metrics
+      protocol: TCP
+      port: 8088
+      targetPort: 8088
+      nodePort: $METRICS_PORT
+  selector:
+    app: $APP_NAME
+  type: NodePort
+EOF'''
+          
+          // 查看生成的 deployment.yaml 文件内容
+          sh 'cat deployment.yaml'
+          
+          // 下载 kubectl 工具
+          sh 'curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"'
+          // 安装 kubectl
+          sh 'install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl'
+
+          // 设置 kubeconfig 配置文件
+          withCredentials([kubeconfigContent(credentialsId : 'kubeconfig-id' ,variable : 'KUBECONFIG' ,)]) {
+            sh '''
+            set +x
+            mkdir ~/.kube
+            echo "$KUBECONFIG" > ~/.kube/config
+            '''
+          }
+
+          // 输出 Kubernetes 集群信息
+          sh 'kubectl cluster-info'
+          
+          // 应用生成的 Kubernetes 配置文件，创建 Deployment 和 Service
+          sh 'kubectl apply -f deployment.yaml'
+        }
+      }
+    }
+  }
+}

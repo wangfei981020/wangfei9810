@@ -1,0 +1,18 @@
+select * from core_accounts ;
+select * from core_global_configurations ;
+select * from core_graineds ;
+helm uninstall yearning -n yearning 
+helm upgrade -i yearning . -n yearning
+data-yearning-mysql-primary-0
+
+kubectl get pvc -l release=yearning -n yearning
+
+data-yearning-mysql-primary-0
+{{- printf "%s" (include "yearning.mysql.fullname" .) -}}
+
+mysqldump -u root -p --databases yearning > /tmp/yearning_backup.sql
+mysql -u root -p yearning < /tmp/yearning_backup.sql
+kubectl cp yearning/yearning-mysql-primary-0:/tmp/yearning_backup.sql.tar ./yearning_backup.sql.tar
+kubectl cp yearning/yearning-mysql-primary-0:/tmp/yearning_backup.sql ./yearning_backup.sql
+kubectl cp ./yearning_backup.sql yearning/yearning-mysql-0:/tmp/yearning_backup.sql
+

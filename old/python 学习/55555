@@ -1,0 +1,62 @@
+curl -u elastic:3HeON33caqQ2w8NgGFqv  "http://10.160.0.8:9200/_cat/indices?v"
+
+
+
+curl -u elastic:3HeON33caqQ2w8NgGFqv -X GET "http://10.160.0.8:9200/${exampleVariable1}/_search" -H 'Content-Type: application/json' -d '{
+  "query": {
+    "match_all": {}
+  }
+}'
+java-gcp-dc-api-g22-uat*
+
+
+curl -u "elastic:3HeON33caqQ2w8NgGFqv" -X DELETE -ks "https://127.0.0.1:9200/.ds-java-g20_gi_gamedata-g20-uat-filebeat-2024.10.17-000001"
+
+
+172.16.157.234:30035
+172.16.59.172:30037
+172.16.74.33:30039
+
+
+10.164.16.56    
+10.164.16.60    
+10.164.16.61    
+10.164.17.129   
+10.164.17.130   
+10.164.17.149   
+
+10.164.16.0/24     30035/30037/30039
+10.164.17.0/24
+
+
+10.163.16.3   10.161.64.8 6506
+
+
+10.251.15.17:2912
+10.251.15.128:6204
+10.251.15.128:6208 
+10.251.15.128:6212
+10.251.15.128:6216
+10.251.15.128:6220
+10.251.15.127:4348
+10.251.15.126:6064
+10.251.15.110:6207
+
+
+
+ beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=e2-standard-8,beta.kubernetes.io/os=linux,cloud.google.com/gke-boot-disk=pd-balanced,cloud.google.com/gke-container-runtime=containerd,cloud.google.com/gke-cpu-scaling-level=8,cloud.google.com/gke-logging-variant=DEFAULT,cloud.google.com/gke-max-pods-per-node=110,cloud.google.com/gke-memory-gb-scaling-level=32,cloud.google.com/gke-netd-ready=true,cloud.google.com/gke-nodepool=ppu-k8s-cluster-app-pool-02,cloud.google.com/gke-os-distribution=cos,cloud.google.com/gke-provisioning=standard,cloud.google.com/gke-stack-type=IPV4,cloud.google.com/machine-family=e2,cloud.google.com/private-node=true,failure-domain.beta.kubernetes.io/region=asia-east2,failure-domain.beta.kubernetes.io/zone=asia-east2-c,kubernetes.io/arch=amd64,kubernetes.io/hostname=gke-ppu-k8s-cluster-ppu-k8s-cluster-a-55da9161-gz14,kubernetes.io/os=linux,node.kubernetes.io/instance-type=e2-standard-8,node.kubernetes.io/masq-agent-ds-ready=true,tier=app,topology.gke.io/zone=asia-east2-c,topology.kubernetes.io/region=asia-east2,topology.kubernetes.io/zone=asia-east2-c
+
+
+kubectl label nodes gke-ppu-k8s-cluster-ppu-k8s-cluster-a-55da9161-aalh testgo=testgo
+kubectl label nodes gke-ppu-k8s-cluster-ppu-k8s-cluster-a-55da9161-gz14 testgo=testgo
+kubectl label nodes gke-ppu-k8s-cluster-ppu-k8s-cluster-a-55da9161-aalh testgo-
+kubectl label nodes gke-ppu-k8s-cluster-ppu-k8s-cluster-a-55da9161-gz14 testgo-
+
+
+
+gke-ppu-k8s-cluster-ppu-k8s-cluster-a-55da9161-aalh   10.163.48.238
+gke-ppu-k8s-cluster-ppu-k8s-cluster-a-55da9161-gz14   10.163.48.237
+
+wallet-client-backend
+
+210.57.33.164

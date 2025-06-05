@@ -1,0 +1,13 @@
+# 1 列出所有环境
+
+conda info --envs
+
+# 2. 激活环境 
+# 找到你想要激活的环境名称（例如，假设你的环境名称是 myenv），然后使用以下命令激活它：
+conda activate myenv
+
+# 3. 创建新环境（如果需要）
+conda create --name myenv python=3.8
+
+# 4. 激活新环境
+conda activate myenv

@@ -1,0 +1,122 @@
+kubectl debug pod/my-app -it --image=busybox --target=my-app
+kubectl debug -n g32-uat wallet-client-backend-78d774658-hlhqg --image=harbor.slleisure.com/env/busybox:v1 -it --target=wallet-client-backend-78d774658-hlhqg -- sh
+
+
+
+env: 
+  - name: SQL_FILES
+    valueFrom:
+      configMapKeyRef:
+        name: {{ include "common.names.fullname" . }}
+        key: sql_files
+  - name: MYSQL_HOST
+    valueFrom:
+      secretKeyRef:
+        name: {{ include "common.names.fullname" . }}
+        key: mysqlMasterHost
+  - name: MYSQL_DB
+    valueFrom:
+      secretKeyRef:
+        name: {{ include "common.names.fullname" . }}
+        key: mysqlDatabase
+  - name: MYSQL_PORT
+    valueFrom:
+      secretKeyRef:
+        name: {{ include "common.names.fullname" . }}
+        key: mysqlMasterPort
+  - name: MYSQL_USER
+    valueFrom:
+      secretKeyRef:
+        name: {{ include "common.names.fullname" . }}
+        key: mysqlMasterUser
+  - name: MYSQL_PASSWD
+    valueFrom:
+      secretKeyRef:
+        name: {{ include "common.names.fullname" . }}
+        key: mysqlMasterPassword
+
+helm  upgrade -i -n devops yearning .
+helm uninstall yearning -n devops
+
+
+helm  upgrade -i -n devops nacos .
+helm uninstall nacos -n devops
+
+SECRET_KEY
+Y_LANG=zh_CN
+
+CREATE DATABASE `yearning` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+CREATE USER 'yearning_db'@'%' IDENTIFIED BY 'Yd4NsQ_93eL2';
+GRANT ALL PRIVILEGES ON yearning.* TO 'yearning_db'@'%';
+flush privilege;
+command: ["sh", "-c", "mysql -u $MYSQL_USER -p$MYSQL_PASSWD $MYSQL_DB < $SQL_FILES; if [ $? -eq 0 ]; then echo 'SQL execution succeeded'; else echo 'SQL execution failed'; exit 1; fi"]
+mysql -h$MYSQL_HOST -p$MYSQL_PASSWD -P$MYSQL_PORT  $MYSQL_DB -e "SELECT username FROM core_graineds;" | grep admin 
+
+select username from core_accounts ; admin
+select username from core_graineds ; admin
+use yearning;
+INSERT INTO `core_accounts` (`username`,`password`,`department`,`real_name`,`email`,`is_recorder`) VALUES ('admin','pbkdf2_sha256$120000$LwSop65y17f4$AgXGkzmZLF7Lw3K1gToLkOBHqziBC0Wpf3bBIHoWA5Q=','DBA','超级管理员','',0);
+
+INSERT INTO `core_global_configurations` (`authorization`,`ldap`,`message`,`other`,`stmt`,`audit_role`,`board`) VALUES ('global','{"url":"","user":"","password":"","type":"(\u0026(objectClass=organizationalPerson)   (sAMAccountName=%s))","sc":"","ldaps":false,"map":"","test_user":"","test_password":""}','{"web_hook":"","host":"","port":25,"user":"","password":"","to_user":"","mail":false,"ding":false,"ssl":false,"push_type":false,"key":""}','{"limit":1000,"idc":["Aliyun","AWS"],"query":false,"register":false,"export":false,"ex_query_time":60}',0,'{"DMLAllowLimitSTMT":false,"DMLInsertColumns":false,"DMLMaxInsertRows":10,"DMLWhere":false,"DMLAllowInsertNull":false,"DMLOrder":false,"DMLSelect":false,"DMLInsertMustExplicitly":false,"DDLEnablePrimaryKey":false,"DDLCheckTableComment":false,"DDlCheckColumnComment":false,"DDLCheckColumnNullable":false,"DDLCheckColumnDefault":false,"DDLEnableAcrossDBRename":false,"DDLEnableAutoincrementInit":false,"DDLEnableAutoIncrement":false,"DDLEnableAutoincrementUnsigned":false,"DDLEnableDropTable":false,"DDLEnableDropDatabase":false,"DDLEnableNullIndexName":false,"DDLIndexNameSpec":false,"DDLMaxKeyParts":5,"DDLMaxKey":5,"DDLMaxCharLength":10,"MaxTableNameLen":10,"MaxAffectRows":1000,"MaxDDLAffectRows":0,"SupportCharset":"","SupportCollation":"","CheckIdentifier":false,"MustHaveColumns":"","DDLMultiToCommit":false,"DDLPrimaryKeyMust":false,"DDLAllowColumnType":false,"DDLImplicitTypeConversion":false,"DDLAllowPRINotInt":false,"DDLEnableForeignKey":false,"DDLTablePrefix":"","DDLColumnsMustHaveIndex":"","DDLAllowChangeColumnPosition":false,"DDLCheckFloatDouble":false,"IsOSC":false,"OSCExpr":"","OscSize":0,"AllowCreateView":false,"AllowCrateViewWithSelectStar":false,"AllowCreatePartition":false,"AllowSpecialType":false,"PRIRollBack":false}','');
+
+INSERT INTO `core_graineds` (`username`,`group`) VALUES ('admin','["admin"]');
+
+
+
+/home/cesar/yearning/db
+
+docker run -d --name my_mysql --privileged=true -v /home/cesar/yearning/db:/var/lib/mysql --restart always -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_DATABASE=yearning -p 3710:3306  mysql:8.0.32 --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+
+
+https://github.com/cookieY/Yearning/releases/download/v3.1.8/Yearning-v3.1.8-linux-arm64.zip
+
+
+  mysqlMasterHost: {{ (include "nacos.mysql.primaryHost" .) | b64enc | quote }}
+  mysqlDatabase: {{ .Values.mysql.auth.database | b64enc | quote }}
+  mysqlMasterPort: {{ "3306" | b64enc }}
+  mysqlMasterUser: {{ .Values.mysql.auth.username | b64enc | quote }}
+  mysqlMasterPassword: {{ .Values.mysql.auth.password | b64enc | quote }}
+  mysqlSlaveHost: {{ (include "nacos.mysql.secondaryHost" .) | b64enc | quote }}
+  mysqlSlavePort: {{ "3306" | b64enc }}
+
+
+
+  mysqlMasterHost: {{ (include "yearning.mysql.primaryHost" .) | b64enc | quote }}
+  mysqlDatabase: {{ .Values.mysql.auth.database | b64enc | quote }}
+  mysqlMasterPort: {{ "3306" | b64enc }}
+  mysqlMasterUser: {{ .Values.mysql.auth.username | b64enc | quote }}
+  mysqlMasterPassword: {{ .Values.mysql.auth.password | b64enc | quote }}
+  secretKey: {{ .Values.mysql.auth.secretkey | b64enc | quote }}
+  cnLanguage: {{ .Values.mysql.auth.lang | b64enc | quote }}
+
+  MYSQL_ADDR: {{ (include "yearning.mysql.primaryHost" .) | b64enc | quote }}
+  MYSQL_DB: {{ .Values.mysql.auth.database | b64enc | quote }}
+  MYSQL_PORT: {{ "3306" | b64enc }}
+  MYSQL_USER: {{ .Values.mysql.auth.username | b64enc | quote }}
+  MYSQL_PASSWORD: {{ .Values.mysql.auth.password | b64enc | quote }}
+
+secretkey
+
+/bitnami/mysql/data/
+
+CREATE TABLE test_table (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    age INT,
+    email VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE test_table (
+    id INT AUTO_INCREMENT PRIMARY KEY,  -- 主键，不能为 NULL
+    name VARCHAR(100) NOT NULL,
+    age INT,  -- 允许为 NULL
+    email VARCHAR(100),  -- 允许为 NULL
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_email (email)  -- 创建唯一索引，指定名字为 unique_email
+);
+
+
+START TRANSACTION;
+DELETE FROM core_accounts WHERE id = 4;
+COMMIT;

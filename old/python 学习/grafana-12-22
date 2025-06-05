@@ -1,0 +1,15 @@
+SELECT
+  1 AS "Status",  -- 新增列，用于标记红色状态
+  SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'namespace=', -1), ',', 1) AS "Namespace",
+  SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'container=', -1), ',', 1) AS "Container",
+  rule_name AS "Rule Name",
+  trigger_value AS "Value",
+  FROM_UNIXTIME(trigger_time) AS "Trigger Time"  -- 转换为可读格式
+FROM
+  alert_cur_event
+WHERE
+  original_tags LIKE '%namespace=%' 
+  AND original_tags LIKE '%pod=%'
+  AND SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'namespace=', -1), ',', 1) = 'g20-uat'
+ORDER BY
+  "Namespace" ASC, "Container" ASC;

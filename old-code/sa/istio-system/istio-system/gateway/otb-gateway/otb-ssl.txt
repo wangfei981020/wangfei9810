@@ -1,0 +1,4 @@
+kubectl create secret tls slleisure-com-cert \
+  --cert=slleisure.com.crt \
+  --key=slleisure.com.key \
+  --namespace=istio-system

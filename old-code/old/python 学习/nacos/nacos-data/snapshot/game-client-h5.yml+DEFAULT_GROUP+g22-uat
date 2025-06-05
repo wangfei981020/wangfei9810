@@ -1,0 +1,16 @@
+project: game-client-h5
+deploy_path: /home/centos/g20-uat/G20-game-client/h5/
+source_path: /data/vcs/g20/tidb/G20-game-client-h5
+rsync_config: 
+    - ProxyConfig.json
+ProxyConfig.json: |
+  {
+  "sites": [
+    {
+      "name": "Master",
+      "wsURL": "goproxy.g20-uat.com",
+      "gameURL": "goproxy.g20-uat.com:5100",
+      "queryURL": "https://gi-game.g20-uat.com"
+    }
+  ]
+  }

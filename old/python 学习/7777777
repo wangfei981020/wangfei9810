@@ -1,0 +1,92 @@
+#game_client_api庫數據主库配置
+spring.datasource.master.dc.driver-class-name = com.mysql.cj.jdbc.Driver
+
+spring.datasource.master.dc.url =jdbc:mysql://10.195.2.251:4105/game_client_api?useSSL=false&characterEncoding=utf8&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=1000&prepStmtCacheSqlLimit=200480&useConfigs=maxPerformance&rewriteBatchedStatements=true&allowMultiQueries=true
+spring.datasource.master.dc.username = ${GCI_DB_USERNAME:g20_prod}
+spring.datasource.master.dc.password = ${GCI_DB_PASSWORD:jGt5f4Hks}
+spring.datasource.master.dc.type = com.alibaba.druid.pool.DruidDataSource
+spring.datasource.master.dc.initialSize = 10
+spring.datasource.master.dc.maxActive = 100
+spring.datasource.master.dc.minIdle = 3
+spring.datasource.master.dc.maxWait = 600000
+spring.datasource.master.dc.removeAbandoned = true
+spring.datasource.master.dc.removeAbandonedTimeout = 180
+spring.datasource.master.dc.timeBetweenEvictionRunsMillis = 600000
+spring.datasource.master.dc.minEvictableIdleTimeMillis = 300000
+spring.datasource.master.dc.validationQuery = SELECT 1 FROM DUAL
+spring.datasource.master.dc.testWhileIdle = true
+spring.datasource.master.dc.testOnBorrow = false
+spring.datasource.master.dc.testOnReturn = false
+spring.datasource.master.dc.poolPreparedStatements = true
+spring.datasource.master.dc.maxPoolPreparedStatementPerConnectionSize = 100
+spring.datasource.master.dc.connectionProperties = druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+spring.datasource.master.dc.filters = stat
+
+#game_client_api庫數據从库配置
+spring.datasource.slave.dc.driver-class-name = com.mysql.cj.jdbc.Driver
+spring.datasource.slave.dc.url = jdbc:mysql://从10.195.2.216:4105/game_client_api?useSSL=false&characterEncoding=utf8&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=1000&prepStmtCacheSqlLimit=200480&useConfigs=maxPerformance&rewriteBatchedStatements=true&allowMultiQueries=true
+spring.datasource.slave.dc.username = ${GCI_DB_USERNAME:g20_pst}
+spring.datasource.slave.dc.password = ${GCI_DB_PASSWORD:jrH7nrg8eQ}
+spring.datasource.slave.dc.type = com.alibaba.druid.pool.DruidDataSource
+spring.datasource.slave.dc.initialSize = 10
+spring.datasource.slave.dc.maxActive = 100
+spring.datasource.slave.dc.minIdle = 3
+spring.datasource.slave.dc.maxWait = 600000
+spring.datasource.slave.dc.removeAbandoned = true
+spring.datasource.slave.dc.removeAbandonedTimeout = 180
+spring.datasource.slave.dc.timeBetweenEvictionRunsMillis = 600000
+spring.datasource.slave.dc.minEvictableIdleTimeMillis = 300000
+spring.datasource.slave.dc.validationQuery = SELECT 1 FROM DUAL
+spring.datasource.slave.dc.testWhileIdle = true
+spring.datasource.slave.dc.testOnBorrow = false
+spring.datasource.slave.dc.testOnReturn = false
+spring.datasource.slave.dc.poolPreparedStatements = true
+spring.datasource.slave.dc.maxPoolPreparedStatementPerConnectionSize = 100
+spring.datasource.slave.dc.connectionProperties = druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+spring.datasource.slave.dc.filters = stat
+
+#遊戲庫數據源主库配置
+spring.datasource.master.gm.driver-class-name = com.mysql.cj.jdbc.Driver
+spring.datasource.master.gm.url = jdbc:mysql://10.195.2.251:4105/g20_game?useSSL=false&characterEncoding=utf8&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=1000&prepStmtCacheSqlLimit=200480&useConfigs=maxPerformance&rewriteBatchedStatements=true&allowMultiQueries=true|http://10.195.2.251:4105/g20_game?useSSL=false&characterEncoding=utf8&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=1000&prepStmtCacheSqlLimit=200480&useConfigs=maxPerformance&rewriteBatchedStatements=true&allowMultiQueries=true
+spring.datasource.master.gm.username = ${GCI_DB_USERNAME:g20_prod}
+spring.datasource.master.gm.password = ${GCI_DB_PASSWORD:jGt5f4Hks}
+spring.datasource.master.gm.type = com.alibaba.druid.pool.DruidDataSource
+spring.datasource.master.gm.initialSize = 10
+spring.datasource.master.gm.maxActive = 100
+spring.datasource.master.gm.minIdle = 3
+spring.datasource.master.gm.maxWait = 600000
+spring.datasource.master.gm.removeAbandoned = true
+spring.datasource.master.gm.removeAbandonedTimeout = 180
+spring.datasource.master.gm.timeBetweenEvictionRunsMillis = 600000
+spring.datasource.master.gm.minEvictableIdleTimeMillis = 300000
+spring.datasource.master.gm.validationQuery = SELECT 1 FROM DUAL
+spring.datasource.master.gm.testWhileIdle = true
+spring.datasource.master.gm.testOnBorrow = false
+spring.datasource.master.gm.testOnReturn = false
+spring.datasource.master.gm.poolPreparedStatements = true
+spring.datasource.master.gm.maxPoolPreparedStatementPerConnectionSize = 100
+spring.datasource.master.gm.connectionProperties = druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+spring.datasource.master.gm.filters = stat
+
+#遊戲庫數據从库源配置
+spring.datasource.slave.gm.driver-class-name = com.mysql.cj.jdbc.Driver
+spring.datasource.gm.url = jdbc:mysql://10.195.2.216:4105/g20_game?useSSL=false&characterEncoding=utf8&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=1000&prepStmtCacheSqlLimit=200480&useConfigs=maxPerformance&rewriteBatchedStatements=true&allowMultiQueries=true
+spring.datasource.slave.gm.username = ${GCI_DB_USERNAME:g20_pst}
+spring.datasource.slave.gm.password = ${GCI_DB_PASSWORD:jrH7nrg8eQ}
+spring.datasource.slave.gm.type = com.alibaba.druid.pool.DruidDataSource
+spring.datasource.slave.gm.initialSize = 10
+spring.datasource.slave.gm.maxActive = 100
+spring.datasource.slave.gm.minIdle = 3
+spring.datasource.slave.gm.maxWait = 600000
+spring.datasource.slave.gm.removeAbandoned = true
+spring.datasource.slave.gm.removeAbandonedTimeout = 180
+spring.datasource.slave.gm.timeBetweenEvictionRunsMillis = 600000
+spring.datasource.slave.gm.minEvictableIdleTimeMillis = 300000
+spring.datasource.slave.gm.validationQuery = SELECT 1 FROM DUAL
+spring.datasource.slave.gm.testWhileIdle = true
+spring.datasource.slave.gm.testOnBorrow = false
+spring.datasource.slave.gm.testOnReturn = false
+spring.datasource.slave.gm.poolPreparedStatements = true
+spring.datasource.slave.gm.maxPoolPreparedStatementPerConnectionSize = 100
+spring.datasource.slave.gm.connectionProperties = druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+spring.datasource.slave.gm.filters = stat

@@ -1,0 +1,16 @@
+curl -s -X GET "https://argocd.example.com/api/v1/applications/my-app" \
+  -H "Authorization: Bearer <your-token>"
+
+argocd login ppu-argocd.slleisure.com --username admin --password <admin-password> --insecure
+argocd login localhost:8080 --username admin --grpc-web --insecure
+
+kubectl port-forward svc/argocd-server -n argocd 8080:443 
+
+argocd account update-password --account jenkins --new-password 
+
+Generate token for automation account (for GitlabCI ARGOCD_AUTH_TOKEN variable)
+```
+argocd account generate-token --account jenkins --grpc-web
+helm upgrade -n argocd -f values.yaml argocd argo/argo-cd --version 7.4.3
+
+

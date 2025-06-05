@@ -1,0 +1,28 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  annotations:
+  name: g31-istio-ingressgateway-extra
+  namespace: istio-system
+spec:
+  selector:
+    istio: g31-istio-ingressgateway-extra
+  servers:
+  - hosts:
+    - '*.g31prod.com'
+    port:
+      name: http2
+      number: 80
+      protocol: HTTP
+    tls:
+      httpsRedirect: false
+  - hosts:
+    - '*.g31prod.com'
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: g31-prod-com-cert
+      minProtocolVersion: TLSV1_2

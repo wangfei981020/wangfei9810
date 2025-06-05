@@ -1,0 +1,755 @@
+[
+    {
+      "cate": "prometheus",
+      "datasource_ids": [
+        4
+      ],
+      "name": "ApplicationInstanceDown - K8S",
+      "note": "Application is down (instance {{ $labels.pod}})",
+      "prod": "metric",
+      "algorithm": "",
+      "algo_params": null,
+      "delay": 0,
+      "severity": 0,
+      "severities": [
+        2
+      ],
+      "disabled": 1,
+      "prom_for_duration": 60,
+      "prom_ql": "",
+      "rule_config": {
+        "queries": [
+          {
+            "keys": {
+              "labelKey": "",
+              "valueKey": ""
+            },
+            "prom_ql": "up{namespace=~\"g22.*\"} == 0",
+            "severity": 2
+          }
+        ]
+      },
+      "event_relabel_config": null,
+      "prom_eval_interval": 30,
+      "enable_stime": "00:00",
+      "enable_stimes": [
+        "00:00"
+      ],
+      "enable_etime": "00:00",
+      "enable_etimes": [
+        "00:00"
+      ],
+      "enable_days_of_week": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "enable_days_of_weeks": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      ],
+      "enable_in_bg": 1,
+      "notify_recovered": 1,
+      "notify_channels": [
+        "feishucard"
+      ],
+      "notify_repeat_step": 60,
+      "notify_max_number": 0,
+      "recover_duration": 0,
+      "callbacks": [],
+      "runbook_url": "",
+      "append_tags": [],
+      "annotations": {
+        "instance": "{{ $labels.instance }}"
+      },
+      "extra_config": null,
+      "uuid": 0
+    },
+    {
+      "cate": "prometheus",
+      "datasource_ids": [
+        4
+      ],
+      "name": "PersistentvolumeclaimOutOfSpace - K8S",
+      "note": "PVC is almost full.",
+      "prod": "metric",
+      "algorithm": "",
+      "algo_params": null,
+      "delay": 0,
+      "severity": 0,
+      "severities": [
+        3,
+        2
+      ],
+      "disabled": 1,
+      "prom_for_duration": 60,
+      "prom_ql": "",
+      "rule_config": {
+        "queries": [
+          {
+            "prom_ql": "(kubelet_volume_stats_used_bytes{persistentvolumeclaim!=\"\"} / kubelet_volume_stats_capacity_bytes{persistentvolumeclaim!=\"\"}) * 100 > 90",
+            "severity": 2
+          },
+          {
+            "prom_ql": "(kubelet_volume_stats_used_bytes{persistentvolumeclaim!=\"\"} / kubelet_volume_stats_capacity_bytes{persistentvolumeclaim!=\"\"}) * 100 > 80",
+            "severity": 3
+          }
+        ]
+      },
+      "event_relabel_config": null,
+      "prom_eval_interval": 30,
+      "enable_stime": "00:00",
+      "enable_stimes": [
+        "00:00"
+      ],
+      "enable_etime": "00:00",
+      "enable_etimes": [
+        "00:00"
+      ],
+      "enable_days_of_week": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "enable_days_of_weeks": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      ],
+      "enable_in_bg": 1,
+      "notify_recovered": 1,
+      "notify_channels": [
+        "feishucard"
+      ],
+      "notify_repeat_step": 60,
+      "notify_max_number": 0,
+      "recover_duration": 0,
+      "callbacks": [],
+      "runbook_url": "",
+      "append_tags": [],
+      "annotations": {},
+      "extra_config": null,
+      "uuid": 0
+    },
+    {
+      "cate": "prometheus",
+      "datasource_ids": [
+        4
+      ],
+      "name": "Pod Cpu usage exceeds 90% - k8S",
+      "note": "",
+      "prod": "metric",
+      "algorithm": "",
+      "algo_params": null,
+      "delay": 0,
+      "severity": 0,
+      "severities": [
+        2
+      ],
+      "disabled": 0,
+      "prom_for_duration": 60,
+      "prom_ql": "",
+      "rule_config": {
+        "queries": [
+          {
+            "keys": {
+              "labelKey": "",
+              "valueKey": ""
+            },
+            "prom_ql": "sum(rate(container_cpu_usage_seconds_total{namespace!~\".*-tidb\",namespace=~\"g22.*\",service=\"kube-prometheus-stack-kubelet\", container!=\"\"}[5m])*100) by (namespace,pod) / sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits{ namespace!~\".*-tidb\",namespace=~\"g22.*\"}) by (namespace,pod) >= 90",
+            "severity": 2
+          }
+        ]
+      },
+      "event_relabel_config": null,
+      "prom_eval_interval": 30,
+      "enable_stime": "00:00",
+      "enable_stimes": [
+        "00:00"
+      ],
+      "enable_etime": "00:00",
+      "enable_etimes": [
+        "00:00"
+      ],
+      "enable_days_of_week": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "enable_days_of_weeks": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      ],
+      "enable_in_bg": 1,
+      "notify_recovered": 1,
+      "notify_channels": [
+        "feishucard"
+      ],
+      "notify_repeat_step": 60,
+      "notify_max_number": 0,
+      "recover_duration": 0,
+      "callbacks": [],
+      "runbook_url": "",
+      "append_tags": [],
+      "annotations": {},
+      "extra_config": null,
+      "uuid": 0
+    },
+    {
+      "cate": "prometheus",
+      "datasource_ids": [
+        4
+      ],
+      "name": "Pod Disk IOPS is too high - K8S",
+      "note": "",
+      "prod": "metric",
+      "algorithm": "",
+      "algo_params": null,
+      "delay": 0,
+      "severity": 0,
+      "severities": [
+        2
+      ],
+      "disabled": 0,
+      "prom_for_duration": 60,
+      "prom_ql": "",
+      "rule_config": {
+        "queries": [
+          {
+            "keys": {
+              "labelKey": "",
+              "valueKey": ""
+            },
+            "prom_ql": "ceil(sum by(namespace,pod) (rate(container_fs_reads_total{container!=\"\", device=~\"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)\", namespace!~\".*-tidb\",namespace!=\"g22-tidb\",namespace=~\"g22.*\"}[5m]) + rate(container_fs_writes_total{container!=\"\", device=~\"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)\", namespace!~\".*-tidb\",namespace=~\"g22.*\"}[5m]))) > 20",
+            "severity": 2
+          }
+        ]
+      },
+      "event_relabel_config": null,
+      "prom_eval_interval": 30,
+      "enable_stime": "00:00",
+      "enable_stimes": [
+        "00:00"
+      ],
+      "enable_etime": "00:00",
+      "enable_etimes": [
+        "00:00"
+      ],
+      "enable_days_of_week": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "enable_days_of_weeks": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      ],
+      "enable_in_bg": 1,
+      "notify_recovered": 1,
+      "notify_channels": [
+        "feishucard"
+      ],
+      "notify_repeat_step": 60,
+      "notify_max_number": 0,
+      "recover_duration": 0,
+      "callbacks": [],
+      "runbook_url": "",
+      "append_tags": [],
+      "annotations": {},
+      "extra_config": null,
+      "uuid": 0
+    },
+    {
+      "cate": "prometheus",
+      "datasource_ids": [
+        4
+      ],
+      "name": "Pod Disk ThroughPut is too high - K8S",
+      "note": "",
+      "prod": "metric",
+      "algorithm": "",
+      "algo_params": null,
+      "delay": 0,
+      "severity": 0,
+      "severities": [
+        2
+      ],
+      "disabled": 0,
+      "prom_for_duration": 60,
+      "prom_ql": "",
+      "rule_config": {
+        "queries": [
+          {
+            "keys": {
+              "labelKey": "",
+              "valueKey": ""
+            },
+            "prom_ql": "sum by(namespace,pod) (rate(container_fs_reads_bytes_total{container!=\"\", device=~\"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)\", namespace!~\"。*-tidb\",namespace=~\"g22.*\"}[5m]) + rate(container_fs_writes_bytes_total{container!=\"\", device=~\"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)\", namespace!~\"。*-tidb\",namespace=~\"g22.*\"}[5m]))  > 157286400",
+            "severity": 2
+          }
+        ]
+      },
+      "event_relabel_config": null,
+      "prom_eval_interval": 30,
+      "enable_stime": "00:00",
+      "enable_stimes": [
+        "00:00"
+      ],
+      "enable_etime": "00:00",
+      "enable_etimes": [
+        "00:00"
+      ],
+      "enable_days_of_week": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "enable_days_of_weeks": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      ],
+      "enable_in_bg": 0,
+      "notify_recovered": 1,
+      "notify_channels": [
+        "feishucard"
+      ],
+      "notify_repeat_step": 60,
+      "notify_max_number": 0,
+      "recover_duration": 0,
+      "callbacks": [],
+      "runbook_url": "",
+      "append_tags": [],
+      "annotations": {},
+      "extra_config": null,
+      "uuid": 0
+    },
+    {
+      "cate": "prometheus",
+      "datasource_ids": [
+        4
+      ],
+      "name": "Pod Memory usage exceeds 90% - K8S",
+      "note": "",
+      "prod": "metric",
+      "algorithm": "",
+      "algo_params": null,
+      "delay": 0,
+      "severity": 0,
+      "severities": [
+        2
+      ],
+      "disabled": 0,
+      "prom_for_duration": 60,
+      "prom_ql": "",
+      "rule_config": {
+        "queries": [
+          {
+            "keys": {
+              "labelKey": "",
+              "valueKey": ""
+            },
+            "prom_ql": "sum(container_memory_working_set_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", namespace!~\"。*-tidb\",namespace=~\"g22.*\",pod!~\"anetd.*\",service=\"kube-prometheus-stack-kubelet\",container!=\"\", image!=\"\"}) by (namespace,pod) / sum(cluster:namespace:pod_memory:active:kube_pod_container_resource_limits{ namespace!~\"。*-tidb\",namespace=~\"g22.*\"}) by (namespace,pod) * 100 >= 90",
+            "severity": 2
+          }
+        ]
+      },
+      "event_relabel_config": null,
+      "prom_eval_interval": 30,
+      "enable_stime": "00:00",
+      "enable_stimes": [
+        "00:00"
+      ],
+      "enable_etime": "00:00",
+      "enable_etimes": [
+        "00:00"
+      ],
+      "enable_days_of_week": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "enable_days_of_weeks": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      ],
+      "enable_in_bg": 1,
+      "notify_recovered": 1,
+      "notify_channels": [
+        "feishucard"
+      ],
+      "notify_repeat_step": 60,
+      "notify_max_number": 0,
+      "recover_duration": 0,
+      "callbacks": [],
+      "runbook_url": "",
+      "append_tags": [],
+      "annotations": {},
+      "extra_config": null,
+      "uuid": 0
+    },
+    {
+      "cate": "prometheus",
+      "datasource_ids": [
+        4
+      ],
+      "name": "Pod receive is too high - K8S",
+      "note": "",
+      "prod": "metric",
+      "algorithm": "",
+      "algo_params": null,
+      "delay": 0,
+      "severity": 0,
+      "severities": [
+        2
+      ],
+      "disabled": 0,
+      "prom_for_duration": 60,
+      "prom_ql": "",
+      "rule_config": {
+        "queries": [
+          {
+            "keys": {
+              "labelKey": "",
+              "valueKey": ""
+            },
+            "prom_ql": "sum(rate(container_network_receive_bytes_total{ namespace!~\".*tidb\",namespace=~\"g22.*\",pod!~\"eks-pod-identity.*|kube-prometheus-stack-prometheus.*|kube-proxy.*|aws-node.*\"}[5m])) by (namespace,pod) > 20971520",
+            "severity": 2
+          }
+        ]
+      },
+      "event_relabel_config": null,
+      "prom_eval_interval": 30,
+      "enable_stime": "00:00",
+      "enable_stimes": [
+        "00:00"
+      ],
+      "enable_etime": "00:00",
+      "enable_etimes": [
+        "00:00"
+      ],
+      "enable_days_of_week": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "enable_days_of_weeks": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      ],
+      "enable_in_bg": 1,
+      "notify_recovered": 1,
+      "notify_channels": [
+        "feishucard"
+      ],
+      "notify_repeat_step": 60,
+      "notify_max_number": 0,
+      "recover_duration": 0,
+      "callbacks": [],
+      "runbook_url": "",
+      "append_tags": [],
+      "annotations": {},
+      "extra_config": null,
+      "uuid": 0
+    },
+    {
+      "cate": "prometheus",
+      "datasource_ids": [
+        4
+      ],
+      "name": "Pod Status  Alarm - K8S",
+      "note": "",
+      "prod": "metric",
+      "algorithm": "",
+      "algo_params": null,
+      "delay": 0,
+      "severity": 0,
+      "severities": [
+        2
+      ],
+      "disabled": 0,
+      "prom_for_duration": 60,
+      "prom_ql": "",
+      "rule_config": {
+        "queries": [
+          {
+            "keys": {
+              "labelKey": "",
+              "valueKey": ""
+            },
+            "prom_ql": "kube_pod_status_phase{namespace!~\".*-tidb\",namespace=~\"g22.*\",phase!~\"Running|Succeeded\"} != 0",
+            "severity": 2
+          }
+        ]
+      },
+      "event_relabel_config": null,
+      "prom_eval_interval": 30,
+      "enable_stime": "00:00",
+      "enable_stimes": [
+        "00:00"
+      ],
+      "enable_etime": "00:00",
+      "enable_etimes": [
+        "00:00"
+      ],
+      "enable_days_of_week": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "enable_days_of_weeks": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      ],
+      "enable_in_bg": 1,
+      "notify_recovered": 1,
+      "notify_channels": [
+        "feishucard"
+      ],
+      "notify_repeat_step": 60,
+      "notify_max_number": 0,
+      "recover_duration": 0,
+      "callbacks": [],
+      "runbook_url": "",
+      "append_tags": [],
+      "annotations": {},
+      "extra_config": null,
+      "uuid": 0
+    },
+    {
+      "cate": "prometheus",
+      "datasource_ids": [
+        4
+      ],
+      "name": "Pod that exited with error - K8S",
+      "note": "",
+      "prod": "metric",
+      "algorithm": "",
+      "algo_params": null,
+      "delay": 0,
+      "severity": 0,
+      "severities": [
+        2
+      ],
+      "disabled": 0,
+      "prom_for_duration": 60,
+      "prom_ql": "",
+      "rule_config": {
+        "queries": [
+          {
+            "keys": {
+              "labelKey": "",
+              "valueKey": ""
+            },
+            "prom_ql": "kube_pod_container_status_last_terminated_exitcode{exit_code!=\"0\",namespace!~\".*-tidb\",namespace=~\"g22.*\"}\n  and\n  on(pod, namespace) kube_pod_container_status_running==0",
+            "severity": 2
+          }
+        ]
+      },
+      "event_relabel_config": null,
+      "prom_eval_interval": 30,
+      "enable_stime": "00:00",
+      "enable_stimes": [
+        "00:00"
+      ],
+      "enable_etime": "00:00",
+      "enable_etimes": [
+        "00:00"
+      ],
+      "enable_days_of_week": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "enable_days_of_weeks": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      ],
+      "enable_in_bg": 1,
+      "notify_recovered": 1,
+      "notify_channels": [
+        "feishucard"
+      ],
+      "notify_repeat_step": 60,
+      "notify_max_number": 0,
+      "recover_duration": 0,
+      "callbacks": [],
+      "runbook_url": "",
+      "append_tags": [],
+      "annotations": {},
+      "extra_config": null,
+      "uuid": 0
+    },
+    {
+      "cate": "prometheus",
+      "datasource_ids": [
+        4
+      ],
+      "name": "Pod Transmit is too high - K8S",
+      "note": "",
+      "prod": "metric",
+      "algorithm": "",
+      "algo_params": null,
+      "delay": 0,
+      "severity": 0,
+      "severities": [
+        2
+      ],
+      "disabled": 0,
+      "prom_for_duration": 60,
+      "prom_ql": "",
+      "rule_config": {
+        "queries": [
+          {
+            "keys": {
+              "labelKey": "",
+              "valueKey": ""
+            },
+            "prom_ql": "sum(rate(container_network_transmit_bytes_total{namespace!~\".*-tidb\",namespace=~\"g22.*\",pod!~\"kube-prometheus-stack.*|eks-pod-identity.*|kube-proxy.*|aws-node.*\"}[5m])) by (namespace,pod) > 20971520",
+            "severity": 2
+          }
+        ]
+      },
+      "event_relabel_config": null,
+      "prom_eval_interval": 30,
+      "enable_stime": "00:00",
+      "enable_stimes": [
+        "00:00"
+      ],
+      "enable_etime": "00:00",
+      "enable_etimes": [
+        "00:00"
+      ],
+      "enable_days_of_week": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "enable_days_of_weeks": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      ],
+      "enable_in_bg": 0,
+      "notify_recovered": 1,
+      "notify_channels": [
+        "feishucard"
+      ],
+      "notify_repeat_step": 60,
+      "notify_max_number": 0,
+      "recover_duration": 0,
+      "callbacks": [],
+      "runbook_url": "",
+      "append_tags": [],
+      "annotations": {},
+      "extra_config": null,
+      "uuid": 0
+    }
+  ]

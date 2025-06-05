@@ -1,0 +1,58 @@
+{{- if .IsRecovered }}
+✅ **Alert Recovered**  
+{{- if .GroupName }}
+**Alert Project:** {{.GroupName}}
+{{- end }}
+**Status Level:** S{{.Severity}} Recovered  
+**Alert Name:** {{.RuleName}}  
+{{- if .TagsMap.health_status }}
+**Status:** {{ .TagsMap.health_status }}
+{{- else if .TagsMap.phase}}
+**Status:** {{ .TagsMap.phase }}
+{{- end }}
+{{- if .TagsMap.dest_namespace }}
+**Namespace:** {{ .TagsMap.dest_namespace }}
+{{- else if .TagsMap.namespace }}
+**Namespace:** {{ .TagsMap.namespace }}
+{{- end }}
+{{- if .TagsMap.name }}
+**Pod:** {{ .TagsMap.name }}
+{{- else if .TagsMap.pod}}
+**Pod:** {{ .TagsMap.pod }}
+{{- end }}
+**Instance:** {{ if .TargetIdent }}{{ .TargetIdent }}{{ else }}{{ .AnnotationsJSON.instance }}{{ end }}  
+**Hostname:** {{ if .AnnotationsJSON.hostname }}{{ .AnnotationsJSON.hostname }}{{ else }}none{{ end }}
+**Recovery Time:** {{ timeformat .LastEvalTime }}  
+**Alert Description:** **Service has been restored**  
+
+{{- else }}
+🔴 **Alert Triggered**  
+{{- if .GroupName }}
+**Alert Project:** {{.GroupName}}
+{{- end }}
+**Status Level:** S{{.Severity}} Triggered  
+**Alert Name:** {{.RuleName}}
+{{- if .TagsMap.health_status }}
+**Status:** {{ .TagsMap.health_status }}
+{{- else if .TagsMap.phase}}
+**Status:** {{ .TagsMap.phase }}
+{{- end }}
+{{- if .TagsMap.dest_namespace }}
+**Namespace:** {{ .TagsMap.dest_namespace }}
+{{- else if .TagsMap.namespace }}
+**Namespace:** {{ .TagsMap.namespace }}
+{{- end }}
+{{- if .TagsMap.name }}
+**Pod:** {{ .TagsMap.name }}
+{{- else if .TagsMap.pod}}
+**Pod:** {{ .TagsMap.pod }}
+{{- end }}
+**Instance:** {{ if .TargetIdent }}{{ .TargetIdent }}{{ else }}{{ .AnnotationsJSON.instance }}{{ end }} 
+**Hostname:** {{ if .AnnotationsJSON.hostname }}{{ .AnnotationsJSON.hostname }}{{ else }}none{{ end }}
+**Trigger Time:** {{ timeformat .TriggerTime }}  
+**Send Time:** {{ timestamp }}  
+**Trigger Value:** {{.TriggerValue}}  
+{{- if .RuleNote }}
+**Alert Description:** **{{.RuleNote}}**  
+{{- end }}
+{{- end }}

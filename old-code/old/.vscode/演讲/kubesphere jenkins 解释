@@ -1,0 +1,168 @@
+pipeline {
+  agent {
+    node {
+      label 'jdk11'  // 在标签为 'jdk11' 的节点上执行构建任务
+    }
+  }
+  stages {
+    stage('拉取源代码') {
+      agent none  // 本阶段没有指定代理，表示该阶段将不会有额外的执行节点
+      steps {
+        sh 'git config --global http.sslVerify false'  // 禁用 SSL 验证，适用于自签名证书等场景
+        checkout([$class: 'GitSCM', branches: [[name: '$GIT_BRANCH']], doGenerateSubmoduleConfigurations: false, extensions: [[
+          $class: 'SubmoduleOption',
+          disableSubmodules: false,
+          parentCredentials: true,
+          recursiveSubmodules: true,
+          reference: '',
+          trackingSubmodules: false
+        ]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'git-id', url: '$GIT_URL']]])  // 从指定的 Git 仓库拉取代码，使用给定的凭证 ID 进行身份验证
+        sh 'ls -alh *'  // 列出当前目录下的文件，确认代码已经拉取下来
+      }
+    }
+
+    stage('构建并推送镜像') {
+      agent none  // 本阶段没有指定代理，表示该阶段将不会有额外的执行节点
+      steps {
+        script {
+          env.COMMIT_ID = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()  // 获取当前 Git 提交的短哈希值，作为镜像标签的一部分
+          env.TIMESTAMP = sh(returnStdout: true, script: 'date +%Y%m%d%H%M%S').trim()  // 获取当前时间戳，作为镜像标签的一部分
+          env.DOCKER_TAG = "${TIMESTAMP}-${COMMIT_ID}-${BUILD_NUMBER}"  // 构造镜像标签，包括时间戳、提交哈希和构建号
+        }
+
+        container('maven') {  // 使用名为 'maven' 的容器来执行 Maven 构建
+          sh '''mvn -am clean package -DskipTests -s settings.xml
+ls -alh ./$MODULE/target/*'''  // 使用 Maven 构建项目，跳过测试，并列出构建生成的文件
+          sh 'podman build -f $MODULE/Dockerfile -t $REGISTRY/$PROJECT/$APP_NAME:$DOCKER_TAG .'  // 使用 Podman 构建 Docker 镜像，并指定标签
+          withCredentials([usernamePassword(credentialsId : 'harbor-id', passwordVariable : 'DOCKER_PASSWORD', usernameVariable : 'DOCKER_USERNAME')]) {
+            sh 'echo "$DOCKER_PASSWORD" | podman login $REGISTRY -u "$DOCKER_USERNAME" --password-stdin'  // 使用凭证登录 Docker 镜像仓库（Harbor）
+            sh 'podman push $REGISTRY/$PROJECT/$APP_NAME:$DOCKER_TAG'  // 将构建的镜像推送到 Harbor 仓库
+          }
+        }
+      }
+    }
+
+    stage('部署至 dev 环境') {
+      agent none  // 本阶段没有指定代理，表示该阶段将不会有额外的执行节点
+      steps {
+        container('maven') {  // 使用名为 'maven' 的容器来执行部署操作
+          sh '''cat > deployment.yaml <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $APP_NAME
+  namespace: $PROJECT
+  labels:
+    app: $APP_NAME
+spec:
+  replicas: $POD_REPLICAS  // 设置副本数量
+  selector:
+    matchLabels:
+      app: $APP_NAME
+  template:
+    metadata:
+      labels:
+        app: $APP_NAME
+    spec:
+      imagePullSecrets:
+        - name: harbor-id  // 使用 harbor-id 密钥来拉取镜像
+      containers:
+        - name: $APP_NAME
+          image: $REGISTRY/$PROJECT/$APP_NAME:$DOCKER_TAG  // 使用之前构建并推送的 Docker 镜像
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "curl", "-X POST", "127.0.0.1:8088/actuator/shutdown" ]  // 配置容器在关闭前发送 shutdown 请求
+          ports:
+            - name: tcp-8080
+              containerPort: 8080
+              protocol: TCP
+            - name: tcp-8088
+              containerPort: 8088
+              protocol: TCP
+          env:  // 设置环境变量，用于连接到 Nacos 配置中心
+            - name: REGISTER_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: nacos
+                  key: REGISTER_HOST
+            - name: NAMESPACE
+              valueFrom:
+                secretKeyRef:
+                  name: nacos
+                  key: NAMESPACE
+            - name: REGISTER_USER
+              valueFrom:
+                secretKeyRef:
+                  name: nacos
+                  key: REGISTER_USER
+            - name: REGISTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nacos
+                  key: REGISTER_PASSWORD
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8088  // 设置 Readiness 探针路径
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8088  // 设置 Liveness 探针路径
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 5
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: $APP_NAME
+    micrometer-prometheus-discovery: 'true'
+  name: $APP_NAME-svc
+  namespace: $PROJECT
+spec:
+  ports:
+    - name: tcp-8080
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: $NODE_PORT  // 暴露应用端口
+    - name: metrics
+      protocol: TCP
+      port: 8088
+      targetPort: 8088
+      nodePort: $METRICS_PORT  // 暴露 metrics 端口
+  selector:
+    app: $APP_NAME
+  type: NodePort  // 设置为 NodePort 类型，以便外部访问
+
+EOF'''  // 结束部署 YAML 文件内容
+          sh 'cat deployment.yaml '  // 打印生成的 YAML 配置文件
+          sh 'curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"'  // 下载最新版本的 kubectl 客户端
+          sh 'install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl'  // 安装 kubectl 到系统路径
+
+          withCredentials([kubeconfigContent(credentialsId : 'kubeconfig-id', variable : 'KUBECONFIG')]) {
+            sh '''
+            set +x
+            mkdir ~/.kube
+            echo "$KUBECONFIG" > ~/.kube/config  // 配置 kubectl 使用提供的 kubeconfig
+            '''
+          }
+
+          sh 'kubectl cluster-info'  // 检查 Kubernetes 集群信息
+          sh 'kubectl apply -f deployment.yaml'  // 部署生成的 YAML 文件到 Kubernetes 集群
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,57 @@
+sum(container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", namespace="$namespace",container!="", image!=""}) by (pod) / sum(cluster:namespace:pod_memory:active:kube_pod_container_resource_limits{namespace="$namespace"}) by (pod)
+sum(container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", namespace="$namespace",container!="", image!=""}) by (pod) / sum(cluster:namespace:pod_memory:active:kube_pod_container_resource_limits{namespace="$namespace"}) by (pod)
+
+
+sum(container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", namespace="devops"}) by (pod) / sum(cluster:namespace:pod_memory:active:kube_pod_container_resource_limits{namespace="devops"}) by (pod)
+
+sum(container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", namespace="devops",service="kube-prometheus-stack-kubelet",container!="", image!=""}) by (pod) / sum(cluster:namespace:pod_memory:active:kube_pod_container_resource_limits{ namespace="devops",service="kube-prometheus-stack-kubelet"}) by (pod)
+
+
+{namespace="devops", pod="clickhouse-zookeeper-0"}
+1.855418
+
+ NAME↑                                     PF         READY         STATUS                   RESTARTS          CPU          MEM         %CPU/R         %CPU/L         %MEM/R         %MEM/L IP                   NODE                                                         AGE             │      │
+│ clickhouse-shard1-2                       ●          1/1           Running                         0         3998         3121            199             99            152             76 172.16.2.17          gke-ppu-k8s-cluster-ppu-k8s-cluster-a-ae17f65e-p3ft          3d8h 
+sum(container_memory_working_set_bytes{job="kubelet", namespace="devops", container!=""}) by (pod)
+{pod="clickhouse-shard1-2"}
+7.078052
+
+container_memory_working_set_bytes{job="kubelet", namespace="devops", container!="",service="kube-prometheus-stack-kubelet",pod="clickhouse-shard1-2"}
+
+sum(container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", namespace=~".*",service="kube-prometheus-stack-kubelet",container!="", image!=""}) by (namespace,pod) / sum(cluster:namespace:pod_memory:active:kube_pod_container_resource_limits{ namespace=~".*"}) by (namespace,pod)
+
+
+
+sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace="dveops"}) by (namespace,pod) / sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits{namespace="devops"}) by (namespace,pod)
+
+container_cpu_usage_seconds_total{namespace="devops",pod="clickhouse-shard1-2",service="kube-prometheus-stack-kubelet"}
+node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace="devops",container!="",pod="clickhouse-shard1-2"}
+node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace="devops",container!="",pod="clickhouse-shard1-2",service="kube-prometheus-stack-kubelet"}
+node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{container="clickhouse", namespace="devops", node="gke-ppu-k8s-cluster-ppu-k8s-cluster-a-ae17f65e-p3ft", pod="clickhouse-shard1-2"}
+7.999667
+
+
+NAME↑                                     PF         READY         STATUS                   RESTARTS          CPU          MEM         %CPU/R         %CPU/L         %MEM/R         %MEM/L IP                   NODE                                                         AGE             │      │
+│ clickhouse-shard1-2                       ●          1/1           Running                         0         3998         3121            199             99            152             76 172.16.2.17      
+
+
+sum(rate(container_cpu_usage_seconds_total{namespace="devops", pod="clickhouse-shard1-2", service="kube-prometheus-stack-kubelet", container!=""}[5m])*100) by (namespace,pod) / sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits{ namespace="devops"}) by (namespace,pod)
+
+
+ceil(sum by(pod) (rate(container_fs_reads_total{container!="", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)", namespace=~".*"}[5m]) + rate(container_fs_writes_total{container!="", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)", namespace=~".*"}[5m])))
+
+ceil(sum by(namespace,pod) (rate(container_fs_reads_total{container!="", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)", namespace=~"g32.*",namespace!="g32-tidb"}[5m]) + rate(container_fs_writes_total{container!="", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)", namespace=~".*"}[5m]))) > 20
+
+sum by(pod) (rate(container_fs_reads_bytes_total{container!="", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)", namespace!="g32-tidb"}[5m]) + rate(container_fs_writes_bytes_total{container!="", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)", namespace!="g32-tidb"}[5m]))
+> 157286400
+
+sum(rate(container_network_receive_bytes_total{ namespace!="g32-tidb"}[5m])) by (namespace,pod) > 20971520
+sum(rate(container_network_transmit_bytes_total{namespace!="g32-tidb"}[5m])) by (pod) > 20971520
+
+
+
+rate(node_network_receive_bytes_total{namespace="monitoring", pod="kube-prometheus-stack-prometheus-node-exporter-tblpv"}[5m])
++ rate(node_network_transmit_bytes_total{namespace="monitoring", pod="kube-prometheus-stack-prometheus-node-exporter-tblpv"}[5m])
+node_network_*{namespace="monitoring", pod="kube-prometheus-stack-prometheus-node-exporter-tblpv"}
+
+

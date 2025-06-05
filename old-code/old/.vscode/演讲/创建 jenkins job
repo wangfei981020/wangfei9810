@@ -1,0 +1,109 @@
+pipeline {
+  agent {
+    node {
+      label 'base'
+    }
+
+  }
+  stages {
+    stage('clone code') {
+      agent none
+      steps {
+        container('base') {
+          sh 'echo "git pull"'
+        }
+
+      }
+    }
+
+    stage('build & push') {
+      agent none
+      steps {
+        container('base') {
+          sh 'echo "docker build"'
+        }
+
+      }
+    }
+
+    stage('push latest') {
+      agent none
+      steps {
+        container('base') {
+          sh 'echo "docker tag"'
+          sh 'echo "docker push"'
+        }
+
+      }
+    }
+
+    stage('deploy to dev') {
+      agent none
+      steps {
+        container('base') {
+          withCredentials([kubeconfigContent(credentialsId: 'kubeconfig-id', variable: 'KUBECONFIG_CONFIG')]) {
+            sh 'mkdir -p ~/.kube/'
+            sh 'echo "$KUBECONFIG_CONFIG" > ~/.kube/config'
+            sh '''cat > deployment.yaml <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  namespace: linshi
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        resources: {}
+status: {}
+EOF'''
+          }
+
+        }
+
+      }
+    }
+
+    stage('deploy to production') {
+      agent none
+      steps {
+        container('base') {
+          withCredentials([kubeconfigContent(credentialsId: 'kubeconfig-id', variable: 'KUBECONFIG_CONFIG')]) {
+            sh 'mkdir -p ~/.kube/'
+            sh 'echo "$KUBECONFIG_CONFIG" > ~/.kube/config'
+            sh 'kubectl apply -f deployment.yaml'
+          }
+
+        }
+
+      }
+    }
+
+  }
+  environment {
+    DOCKER_CREDENTIAL_ID = 'dockerhub-id'
+    GITHUB_CREDENTIAL_ID = 'github-id'
+    KUBECONFIG_CREDENTIAL_ID = 'demo-kubeconfig'
+    REGISTRY = 'docker.io'
+    DOCKERHUB_NAMESPACE = 'docker_username'
+    GITHUB_ACCOUNT = 'kubesphere'
+    APP_NAME = 'devops-java-sample'
+  }
+  parameters {
+    string(name: 'TAG_NAME', defaultValue: '', description: '')
+  }
+}

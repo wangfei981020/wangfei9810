@@ -1,0 +1,15 @@
+agent-web.g31prod.com
+anchor-web.g31prod.com
+auth-api.g31prod.com
+k8s-auth-web.g31prod.com
+gci-api.g31prod.com
+gci-dc-api.g31prod.com
+gci-gateway.g31prod.com
+gci-manager.g31prod.com
+gci-manager-web.g31prod.com
+gci-web.g31prod.com
+gi-dc.g31prod.com
+gi-gamedata.g31prod.com
+gi-goodway.g31prod.com
+k8s-nacos.g31prod.com
+personalcenter.g31prod.com

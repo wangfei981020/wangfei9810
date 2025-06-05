@@ -1,0 +1,7 @@
+Status Level: S{{.Severity}} {{if .IsRecovered}}Recovered{{else}}Triggered{{end}}   
+Rule Name: {{.RuleName}}{{if .RuleNote}}   
+Rule Note: {{.RuleNote}}{{end}}   
+Monitored Metric: {{.TagsJSON}}
+{{if .IsRecovered}}Recovery Time: {{timeformat .LastEvalTime}}{{else}}Trigger Time: {{timeformat .TriggerTime}}
+Trigger Value: {{.TriggerValue}}{{end}}
+Send Time: {{timestamp}}

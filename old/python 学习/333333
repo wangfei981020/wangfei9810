@@ -1,0 +1,96 @@
+gi-gooday 旧
+
+java -Xms2024m -Xmx4048m -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar g20-game-client-api-goodway.jar --spring.cloud.nacos.config.namespace==g20-tidb-gci --spring.cloud.nacos.discovery.namespace==g20-tidb-gci --spring.cloud.nacos.config.name=client-goodway-2.properties
+
+gi-gooday 新
+
+java -Xms2024m -Xmx4048m -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar g20-game-client-api-goodway.jar --spring.cloud.nacos.config.namespace=g20-tidb-gi --spring.cloud.nacos.discovery.namespace=g20-tidb-gi --spring.cloud.nacos.config.name=client-goodway-2
+
+gi-gooday  uat
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.3 -DREGISTER_PORT=8848 -jar g20-game-client-api-goodway.jar --spring.cloud.nacos.config.namespace=g20-tidb-gi --spring.cloud.nacos.config.group=g20-tidb-gi --spring.cloud.nacos.config.name=client-goodway-2 --spring.cloud.nacos.discovery.namespace=g20-tidb-gi
+
+
+GLI-gi-gamedata-api 旧
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar g20-game-client-api-gamedata.jar --spring.cloud.nacos.config.namespace=g20-gi --spring.cloud.nacos.discovery.namespace=g20-gi
+
+GLI-gi-gamedata-api 新
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar g20-game-client-api-gamedata.jar --spring.cloud.nacos.config.namespace=g20-tidb-gi --spring.cloud.nacos.discovery.namespace=g20-tidb-gi --spring.cloud.nacos.config.group=g20-tidb-gi --spring.cloud.nacos.config.name=client-gamedata
+
+GLI-gi-gamedata-api UAT
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.3 -DREGISTER_PORT=8848 -jar g20-game-client-api-gamedata.jar --spring.cloud.nacos.config.namespace=g20-tidb-gi --spring.cloud.nacos.config.group=g20-tidb-gi --spring.cloud.nacos.config.name=client-gamedata --spring.cloud.nacos.discovery.namespace=g20-tidb-gi
+
+GLI-gci-manager-api	 旧
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar game-platform-api-manager.jar --spring.cloud.nacos.config.namespace=g20-gci --spring.cloud.nacos.discovery.namespace=g20-gci
+
+GLI-gci-manager-api	新
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar game-platform-api-manager.jar --spring.cloud.nacos.config.namespace=g20-tidb-gci --spring.cloud.nacos.discovery.namespace=g20-tidb-gci --spring.cloud.nacos.config.group=g20-tidb-gci --spring.cloud.nacos.config.name=platform-manager
+
+GLI-gci-manager-api	 UAT
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.3 -DREGISTER_PORT=8848 -jar game-platform-api-manager.jar --spring.cloud.nacos.config.namespace=g20-tidb-gci --spring.cloud.nacos.config.group=g20-tidb-gci --spring.cloud.nacos.config.name=platform-manager --spring.cloud.nacos.discovery.namespace=g20-tidb-gci
+
+GLI-auth-api 旧
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar g20-tidb-auth-api-web.jar --spring.cloud.nacos.config.namespace=g20-auth --spring.cloud.nacos.discovery.namespace=g20-auth
+
+GLI-auth-api 新
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar g20-tidb-auth-api-web.jar --spring.cloud.nacos.config.namespace=g20-auth --spring.cloud.nacos.discovery.namespace=g20-auth --spring.cloud.nacos.config.name=auth-api.properties 
+
+GLI-auth-api UAT
+
+/usr/local/java/jdk1.8.0_151/bin/java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.3 -DREGISTER_PORT=8848 -jar g20-auth-api-web.jar --spring.cloud.nacos.config.namespace=g20-auth --spring.cloud.nacos.config.name=auth-api.properties --spring.cloud.nacos.discovery.namespace=g20-auth
+
+GLI-gci-api	旧
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar game-platform-api-api.jar --spring.cloud.nacos.config.namespace=g20-gci --spring.cloud.nacos.discovery.namespace=g20-gci
+
+GLI-gci-api	新
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar game-platform-api-api.jar --spring.cloud.nacos.config.namespace=g20-tidb-gci --spring.cloud.nacos.discovery.namespace=g20-tidb-gci --spring.cloud.nacos.config.group=g20-tidb-gci --spring.cloud.nacos.config.name=platform-api
+
+GLI-gci-api	UAT
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.3 -DREGISTER_PORT=8848 -jar game-platform-api-api.jar --spring.cloud.nacos.config.namespace=g20-tidb-gci --spring.cloud.nacos.config.group=g20-tidb-gci --spring.cloud.nacos.config.name=platform-api --spring.cloud.nacos.discovery.namespace=g20-tidb-gci
+
+GLI-gci-gateway	旧
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar game-platform-api-gateway.jar --spring.cloud.nacos.config.namespace=g20-gci --spring.cloud.nacos.discovery.namespace=g20-gci
+
+GLI-gci-gateway	新
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar game-platform-api-gateway.jar --spring.cloud.nacos.config.namespace=g20-tidb-gci --spring.cloud.nacos.discovery.namespace=g20-tidb-gci --spring.cloud.nacos.config.group=g20-tidb-gci --spring.cloud.nacos.config.name=platform-gateway
+
+GLI-gci-gateway	UAT
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.3 -DREGISTER_PORT=8848 -jar game-platform-api-gateway.jar --spring.cloud.nacos.config.namespace=g20-tidb-gci --spring.cloud.nacos.config.group=g20-tidb-gci --spring.cloud.nacos.config.name=platform-gateway --spring.cloud.nacos.discovery.namespace=g20-tidb-gci
+
+GLI-gi-datacenter-api	旧
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar g20-game-client-api-datacenter.jar --spring.cloud.nacos.config.namespace=g20-gi --spring.cloud.nacos.discovery.namespace=g20-gi
+
+GLI-gi-datacenter-api	新
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar g20-game-client-api-datacenter.jar --spring.cloud.nacos.config.namespace=g20-tidb-gi --spring.cloud.nacos.discovery.namespace=g20-tidb-gi --spring.cloud.nacos.config.group=g20-tidb-gi --spring.cloud.nacos.config.name=client-datacenter
+
+GLI-gi-datacenter-api	UAT
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.3 -DREGISTER_PORT=8848 -jar g20-game-client-api-datacenter.jar --spring.cloud.nacos.config.namespace=g20-tidb-gi --spring.cloud.nacos.config.group=g20-tidb-gi --spring.cloud.nacos.config.name=client-datacenter --spring.cloud.nacos.discovery.namespace=g20-tidb-gi
+
+
+https://gci-manager-web.g20gli.com/  登录成功
+https://agent-web.g20gli.com/  登录成功
+https://anchor-web.g20gli.com/ 登录成功
+https://gci-web.g20gli.com/pachinko/index.html 打开正常 (无账号密码，没测试登录)
+https://gci-web.g20gli.com/led/index.html 打开正常 (无账号密码，没测试登录)
+https://gci-web.g20gli.com/personalcenter/index.html 打开正常
+
+GLI-gci-dc-api (给运营统计报表的)
+GLI-auth-api (接公共的)
+GLI-gi-goodway-api (给 bingoplus 推JP奖池的)

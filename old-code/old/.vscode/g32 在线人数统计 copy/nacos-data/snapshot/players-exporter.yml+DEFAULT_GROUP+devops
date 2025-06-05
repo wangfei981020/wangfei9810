@@ -1,0 +1,95 @@
+project_info:
+  - project: g04
+    method: POST
+    url: https://g04-goodway-p.g04backend.com/getOnlineNum
+  - project: g09
+    method: POST
+    url: https://goodway-p.g09game.com/getOnlineNum       
+  - project: g13
+    method: POST
+    url: https://goodway-p.g13game.com/getOnlineNum
+  - project: g16
+    method: POST
+    url: https://goodway.prodg16.com/getOnlineNum
+  - project: g20
+    method: POST
+    url: https://gi-goodway.g20-prod.com/getOnlineNum
+  - project: g23
+    method: POST
+    url: https://gdc-goodway.g23-prod.com/getOnlineNum
+  - project: ppu
+    method: POST
+    url: https://message-client.g32-uat.com/session/count
+    game:
+      # Game 1: jsbjl  极速百家乐
+      - gameId:
+          name: "1"
+          value: "jsbjl"
+          gameRoomIds:
+            - roomId: "1130437824073735680"
+              value: "D055"
+            - roomId: "1131171683691489280"
+              value: "M057"
+
+      # Game 2: longhu  龙虎
+      - gameId:
+          name: "2"
+          value: "longhu"
+          gameRoomIds:
+            - roomId: "1099613405693862912"
+              value: "N020"
+            - roomId: "1101475604790535168"
+              value: "D060"
+            - roomId: "1101475793769096192"
+              value: "M060"
+            - roomId: "1111529663976199680"
+              value: "B022"
+            - roomId: "1129621080207826432"
+              value: "N060"
+
+      # Game 3: lunpan 轮盘
+      - gameId:
+          name: "3"
+          value: "lunpan"
+          gameRoomIds:
+            - roomId: "1117416749940416000"
+              value: "D001"
+            - roomId: "1134961743222106112"
+              value: "S023"
+            - roomId: "1137830742767220736"
+              value: "G001"
+
+      # Game 4: toubao 骰宝
+      - gameId:
+          name: "4"
+          value: "toubao"
+          gameRoomIds:
+            - roomId: "1111532739172783616"
+              value: "N026"
+
+      # Game 6: jdbjl 经典百家乐
+      - gameId:
+          name: "6"
+          value: "jdbjl"
+          gameRoomIds:
+            - roomId: "1104099443522451456"
+              value: "N006"
+
+      # Game 8: yuxiaxie 鱼虾蟹
+      - gameId:
+          name: "8"
+          value: "yuxiaxie"
+          gameRoomIds:
+            - roomId: "1101485302826689536"
+              value: "Y001"
+  - project: g32
+    method: POST
+    url: https://message-client.g32-prod.com/session/count
+    game:
+      # Game 1: jsbjl  极速百家乐
+      - gameId:
+          name: "1"
+          value: "test"
+          gameRoomIds:
+            - roomId: "111"
+              value: "test01"

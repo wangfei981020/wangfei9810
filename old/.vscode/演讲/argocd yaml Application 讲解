@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1   # API 版本，指示 Argo CD 的 API 版本。
+kind: Application                  # Kubernetes 资源类型，这里是 Argo CD 的 Application 资源，表示一个应用。
+metadata:
+  name: app-of-apps-g32-uat         # 应用的名称，标识该 Argo CD 应用。
+  namespace: argocd                 # Argo CD 应用所属的 Kubernetes 命名空间，这里是 "argocd"。
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io  # 为应用添加一个 Finalizer，确保在资源被删除时能清理关联资源。
+spec:
+  project: g32-uat                  # 该应用所属的 Argo CD 项目，项目用于对应用进行分组和管理。
+  source:
+    repoURL: 'https://gitlab-devops.slleisure.com/argocd/ppu-k8s-platform.git' # Git 仓库 URL，Argo CD 从此仓库获取应用的配置。
+    targetRevision: HEAD            # 要使用的 Git 分支或提交，"HEAD" 表示使用仓库中的最新提交。
+    path: argocd-apps/charts/g32-uat-apps # 在仓库中找到应用配置文件的路径。
+    helm:
+      valueFiles:
+        - values.yaml               # Helm 图表的值文件，用于配置 Helm 部署的自定义参数。
+  destination:
+    server: https://kubernetes.default.svc  # 目标 Kubernetes 集群的 API 地址，表示该应用将部署到集群中。
+    namespace: g32-uat               # 该应用将在目标集群的 "g32-uat" 命名空间中进行部署。
+  syncPolicy:
+    retry:                           # 定义同步失败时的重试策略。
+      backoff:                       # 重试间隔策略。
+        duration: "4s"                # 首次重试的延迟时间为 4 秒。
+        factor: 2                     # 每次重试的延迟时间按因子增长，每次增长为上次延迟时间的 2 倍。
+        maxDuration: "17m"            # 最大延迟时间为 17 分钟，即最大重试间隔为 17 分钟。
+    automated:
+      selfHeal: true                  # 自动修复，如果应用配置发生变化，Argo CD 会尝试将集群的应用恢复到 Git 中的配置。
+      prune: true                     # 自动修剪，不再 Git 仓库中存在的资源会在集群中被自动删除。
+    syncOptions:
+    - CreateNamespace=true            # 如果目标命名空间不存在，则自动创建该命名空间。

@@ -1,0 +1,1 @@
+# kubectl apply -f custom_metrics.yaml -n istio-system

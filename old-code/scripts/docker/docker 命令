@@ -1,0 +1,25 @@
+# 打包本地代码生成镜像
+docker build -t code_monitor_uat:v3 .
+docker run -d -p 9110:9110 --name code_monitor_uat code_monitor_uat:v3
+docker stop code_monitor 
+docker rm code_monitor 
+docker rmi code_monitor 
+curl 127.0.0.1:9110/metrics
+gunicorn -c config.py --access-logfile --error-logfile app:app 
+gunicorn -c config.py app:app 
+
+
+gunicorn -w 4 --access-logfile - --error-logfile - app:app
+{"code":"1354","msg":"Transaction failed."}
+
+docker build -t harbor.slleisure.com/env/players-exporter:v10 
+docker push harbor.slleisure.com/env/players-exporter:v10
+
+docker tag e-color-game-frontend:latest harbor.slleisure.com/g35/e-color-game-frontend:20250221193510-01
+docker push harbor.slleisure.com/g35/e-color-game-frontend:20250221193510-01
+docker run -d --name ecolor-frontend ecolor-frontend:20250221180910-01 sleep 3600
+
+
+docker load -i  e-color-game-server-backend.tar
+docker tag e-color-game-server-backend:latest harbor.slleisure.com/g35/e-color-game-server-backend:20250226173910-01
+docker push harbor.slleisure.com/g35/e-color-game-server-backend:20250226173910-01

@@ -1,0 +1,386 @@
+###  查看进程id 启动时间
+ps -eo pid,lstart,etime | grep 
+## ansible-playbook 指定主机组执行
+ansible-playbook -i /etc/ansible/ProjConfigure/hosts G20-prod-nginx-config.yaml --extra-vars "hosts=g20-nginx" --limit g20-nginx --check --diff -vv 
+ansible-playbook -i /etc/ansible/ProjConfigure/hosts G20-prod-nginx-config.yaml --limit g20-nginx --check --diff -vv 
+ansible-playbook -i /etc/ansible/ProjConfigure/hosts G20-prod-nginx-config.yaml --limit g20-nginx --check --diff -vv 
+ansible-playbook /etc/ansible/G20/G20-prod-nginx-config.yaml --limit G20-nginx --check --diff -vv 
+g20-nginx ansible_ssh_host=10.161.32.8 ansible_ssh_user="devops" ansible_ssh_port=51337
+
+
+# 更新密钥 
+ansible-playbook -i all-hosts add_ssh_keys.yml -e target_hosts="g31-prod-test" --check
+
+# docker安装 chrome
+docker run  -itd --shm-size=4096m -p 30079:6901 -e VNC_PW=lb656164 kasmweb/chrome:1.16.0
+
+# xpath helper 获取jumpserver 我的资产IP 
+//*[@id="app"]/div/div[2]/section/div/div/div[2]/div/div[2]/div[2]/div/div[2]/div/div/div/div[1]/div[3]/table/tbody/tr/td[3]
+
+# 安装 nginx 
+ansible -i /home/cesar/g20/G22_nginx_hosts G22-nginx -m ping 
+ansible-playbook -i /home/cesar/g20/G22_nginx_hosts  /etc/ansible/ProjConfigure/installOpenResty.yaml --extra-vars "hosts=G22-nginx " --limit G22-nginx --check --diff -vv
+
+# 从远程主机同步文件到本机
+ansible your_remote_host_group -m fetch -a "src=/tmp/temp_file dest=/path/to/local/destination/ flat=yes" -i /path/to/your/inventory
+# 复制本地文件到远程主机
+ansible your_remote_host_group -m copy -a "src=/path/to/local/file dest=/path/to/remote/destination/" -i /path/to/your/inventory
+
+# 同步远程文件到本机主机
+rsync -avz files@10.146.40.160::G04_retrysvr_go /data/g13/G13_retrysvr_go/ --password-file=/root/rsync.password
+
+/data/g16/retrysvr_go/
+
+ansible -i G16_uat_hosts G16-center -m copy -a "src=/data/g16/G16_retrysvr_go/ dest=/data/g16/retrysvr_go owner=root group=root mode=0755" -b 
+
+
+# 启动 code-server
+docker run -d -it --name code-serverl -p 30002:8080 -v "/home/cesar/code-server/.config:$HOME/.config" -v "/home/cesar/code-server:/home/coder/project"   -u "$(id -u):$(id -g)"  -e "DOCKER_USER=$USER" codercom/code-server:v1
+
+docker run -d -it --name code-server2 -p 30003:8080 -v "/home/cesar/code-server2/.config:$HOME/.config" -v "/home/cesar/code-server2:/home/coder/project"   -u "$(id -u):$(id -g)"  -e "DOCKER_USER=$USER" codercom/code-server:v1
+
+# 临时创建容器，不启动
+docker create --name temp-container harbor.slleisure.com/g29/data-server-api-backend:20241009065458-640c69c-15
+# 从容器复制 jar 到宿主机
+docker cp temp-container:/app.jar /tmp/1111/app.jar
+
+# tar 过滤目录
+tar --exclude='*/log' -czvf archive.tar.gz
+/etc/ansible/ProjConfigure/deployClustermgr.yaml
+
+# 获取g32 开头命令空间所有 pod 
+kubectl get pods --all-namespaces -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name,READY:.status.containerStatuses[0].ready,STATUS:.status.phase,RESTARTS:.status.containerStatuses[0].restartCount,AGE:.metadata.creationTimestamp" | grep "^g32" | awk 'BEGIN {print "NAME\tREADY\tSTATUS\tRESTARTS\tAGE"} {age_cmd="date -d \"" $5 "\" +%s"; age_cmd | getline age_sec; close(age_cmd); age_diff = int((systime() - age_sec) / 3600); if (age_diff < 24) {print $2"\t"$3"\t"$4"\t"$5"\t"age_diff"h"} else {print $2"\t"$3"\t"$4"\t"$5"\t"age_diff" days"}}' | column -t
+
+kubectl get pods --all-namespaces -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name,READY:.status.containerStatuses[0].ready,STATUS:.status.phase,RESTARTS:.status.containerStatuses[0].restartCount,AGE:.metadata.creationTimestamp" | grep "^g32" | awk 'BEGIN {print "NAME,READY,STATUS,RESTARTS,AGE"} {age_cmd="date -d \"" $5 "\" +%s"; age_cmd | getline age_sec; close(age_cmd); age_diff = int((systime() - age_sec) / 3600); if (age_diff < 24) {print $2","$3","$4","$5","age_diff"h"} else {print $2","$3","$4","$5","age_diff" days"}}' > pods_report.csv
+
+kubectl get pods --all-namespaces -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name,READY:.status.containerStatuses[0].ready,STATUS:.status.phase,RESTARTS:.status.containerStatuses[0].restartCount,AGE:.metadata.creationTimestamp" | grep "^g32" | grep -v "^g32-tidb" | grep -v "busybox" | awk 'BEGIN {print "NAME,READY,STATUS,RESTARTS,AGE"} {age_cmd="date -d \"" $5 "\" +%s"; age_cmd | getline age_sec; close(age_cmd); age_diff = int((systime() - age_sec) / 3600); if (age_diff < 24) {print $2","$3","$4","$5","age_diff"h"} else {print $2","$3","$4","$5","age_diff" days"}}'
+
+# 删除2024-07* 目录，并排除 AGLogSvr 目录
+find /opt/log/* -type d -name "2024-07-*" -not -path "*/AGLogSvr/*" -exec rm -r {} +
+# 查看目录总文件大小
+du -sh /opt/log/*/2024-09-* | awk '{total += $1} END {print total}'
+du -sb /opt/log/*/2024-09-* | awk '{total += $1} END {print total/1024/1024/1024 " GB"}'
+
+
+# 拉取harbor 镜像
+docker pull your-harbor-repo/your-image:tag
+docker pull harbor.slleisure.com/env/goproxy:v5
+
+# 运行容器
+docker run -it --name temp-container your-harbor-repo/your-image:tag /bin/sh
+docker run -it --name temp-goproxy harbor.slleisure.com/env/goproxy:v5 /bin/sh
+# 提交更改
+docker commit temp-container your-harbor-repo/your-image:new-tag
+docker commit temp-goproxy harbor.slleisure.com/env/goproxy:v6
+
+# 推送到 harbor 
+docker login your-harbor-repo
+docker push harbor.slleisure.com/env/goproxy:v6
+
+
+# 打包镜像
+docker build -t harbor.slleisure.com/env/goproxy:v20 .
+docker push harbor.slleisure.com/env/goproxy:v20
+
+
+# k8s 给node 打标签
+kubectl label nodes gke-ppu-k8s-cluster-ppu-k8s-cluster-a-55da9161-aalh testgo=testgo
+kubectl label nodes gke-ppu-k8s-cluster-ppu-k8s-cluster-a-55da9161-gz14 testgo=testgo
+# k8s 给 node 删除标签
+kubectl label nodes gke-ppu-k8s-cluster-ppu-k8s-cluster-a-55da9161-aalh testgo-
+kubectl label nodes gke-ppu-k8s-cluster-ppu-k8s-cluster-a-55da9161-gz14 testgo-
+
+# 删除 istio 注入
+kubectl label namespace g32-uat istio-injection- --overwrite
+
+
+# 创建 TLS secret
+kubectl create secret tls g20-uat-com-cert \
+  --cert=g20-uat.com.crt \
+  --key=g20-uat.com.key \
+  --namespace=istio-system
+
+# Oracle Linux Server 安装 netstat 命令
+microdnf install net-tools
+
+# 列出所有索引占用大小
+curl -u "elastic:3HeON33caqQ2w8NgGFqv" -ks "https://127.0.0.1:9200/_cat/indices?v&s=store.size:desc"| grep gb 
+
+# 清理es日志
+curl -u "elastic:3HeON33caqQ2w8NgGFqv" -X DELETE -ks "https://127.0.0.1:9200/.ds-java-g20_gi_gamedata-g20-uat-filebeat-2024.10.17-000001"
+
+G20-ewallet-gcp_cms
+ansible-playbook -i /etc/ansible/inventory/G20_ewallet/G20_ewallet_all /etc/ansible/ProjConfigure/deployClustermgr.yaml --extra-vars "hosts=g20-ewallet-bp proj=g20 masterIp=10.147.7.91" --check --diff -vv 
+G20-ewallet-clustermgr
+ansible-playbook /etc/ansible/G20/G20-prod-nginx-config.yaml --limit G20-nginx  --diff 
+git reset --hard  39aa755f252ac7237dda28cf1f21d589dacab3af
+
+
+## python 打包 脚本为 exe 文件
+pyinstaller --onefile --windowed get_vmware_horizon_view_client.py
+
+# 
+
+---
+deploy_version: 24ce60dd5b20ab2d6c2f28d49831dad827738523
+
+source_path: /data/deploy/g20/G20-prod-nginx/*
+deploy_path: /usr/local/openresty/nginx/conf
+
+sync_user: devops
+sync_mode: "0755"
+service_user: root
+service_mode: "0755"
+
+rsync_opts_exclude_files:
+  - "--exclude=.git"
+  - "--exclude=fastcgi.conf"
+  - "--exclude=fastcgi.conf.default"
+  - "--exclude=fastcgi_params"
+  - "--exclude=fastcgi_params.default"
+  - "--exclude=koi-utf"
+  - "--exclude=koi-win"
+  - "--exclude=mime.types"
+  - "--exclude=mime.types.default"
+  - "--exclude=nginx.conf.default"
+  - "--exclude=scgi_params"
+  - "--exclude=scgi_params.default"
+  - "--exclude=uwsgi_params"
+  - "--exclude=uwsgi_params.default"
+  - "--exclude=win-utf"
+  - "--delete"
+
+
+G20_ewallet-gcp-dc-api
+G20_ewallet-gcp-game-api
+G20_ewallet-gcp-gateway
+G20_ewallet-gcp-gi
+G20_ewallet-gcp-manager-api
+G20_ewallet-gcp-manager-web
+G20_ewallet-gcp-portal-api
+G20_ewallet-gcp-portal-web
+G20_ewallet-gcp-web
+G20_ewallet-center_p
+G20_ewallet_gatesvr_p
+G20_ewallet_gcp_cms
+G20_ewallet_walletsvr_p
+G20_ewallet_website_walletsvr
+
+
+
+
+
+cd /etc/ansible && git checkout prod && git pull
+ansible-playbook /etc/ansible/G20_ewallet/G20-ewallet_gcp_cms.yaml -e "deploy_version=2d984fba93a49a0fb91510e349b7b96f681833f2" -i /etc/ansible/inventory/G20_ewallet/G20_ewallet_prod_hosts  --check --diff -vv
+
+
+[bp:vars]
+ansible_ssh_port=51337
+ansible_ssh_user=devops
+ansible_ssh_private_key_file=keys/devops.pem
+
+
+
+
+g20-ewallet-prod-bp-ph-nacos-01  ansible_host=10.147.7.33
+g20-ewallet-prod-bp-ph-nacos-02  ansible_host=10.147.7.131
+g20-ewallet-prod-bp-ph-nacos-03  ansible_host=10.147.7.8
+g20-ewallet-prod-bp-ph-portal-mobile-01  ansible_host=10.147.7.122
+g20-ewallet-prod-bp-ph-layer-nginx-01  ansible_host=10.147.7.162
+g20-ewallet-prod-bp-ph-layer-nginx-02  ansible_host=10.147.7.77
+
+
+
+
+
+[bp:vars]
+ansible_ssh_port=51337
+ansible_ssh_user=devops
+ansible_ssh_private_key_file=keys/devops.pem
+
+
+[bp]
+g20-ewallet-prod-bp-ph-logsvr-01  ansible_host=
+
+
+g20-ewallet-prod-bp-ph-portal-mobile-01  ansible_host=10.147.7.122
+
+
+g20-ewallet-prod-bp-ph-website-walletsvr-p-01  ansible_host=
+g20-ewallet-prod-bp-ph-clustermgr-01  ansible_host=
+g20-ewallet-prod-bp-ph-cms-01  ansible_host=
+
+G20-ewallet-logsvr
+
+
+
+
+
+
+[bp:vars]
+ansible_ssh_port=51337
+ansible_ssh_user=devops
+ansible_ssh_private_key_file=keys/devops.pem
+
+
+[g20-ewallet-bp]
+g20-ewallet-prod-bp-ph-manager-api-01  ansible_host=10.147.7.90
+g20-ewallet-prod-bp-ph-manager-web-01  ansible_host=10.147.7.72
+g20-ewallet-prod-bp-ph-portal-mobile-01  ansible_host=10.147.7.122
+g20-ewallet-prod-bp-ph-portal-web-01  ansible_host=10.147.7.167
+g20-ewallet-prod-bp-ph-portal-web-02  ansible_host=10.147.7.121
+g20-ewallet-prod-bp-ph-portl-api-01  ansible_host=10.147.7.10
+g20-ewallet-prod-bp-ph-portl-api-02  ansible_host=10.147.7.99
+g20-ewallet-prod-bp-ph-walletsvr-p-01  ansible_host=10.147.7.16
+g20-ewallet-prod-bp-ph-walletsvr-p-02  ansible_host=10.147.7.160
+g20-ewallet-prod-bp-ph-walletsvr-p-03  ansible_host=10.147.7.135
+g20-ewallet-prod-bp-ph-walletsvr-p-04  ansible_host=10.147.7.23
+g20-ewallet-prod-bp-ph-walletsvr-p-05  ansible_host=10.147.7.134
+g20-ewallet-prod-bp-ph-walletsvr-p-06  ansible_host=10.147.7.13
+g20-ewallet-prod-bp-ph-walletsvr-p-07  ansible_host=10.147.7.200
+g20-ewallet-prod-bp-ph-walletsvr-p-08  ansible_host=10.147.7.169
+g20-ewallet-prod-bp-ph-website-walletsvr-p-01  ansible_host=10.147.7.88
+g20-ewallet-prod-bp-ph-game-api-03  ansible_host=10.147.7.151
+g20-ewallet-prod-bp-ph-game-api-04  ansible_host=10.147.7.52
+g20-ewallet-prod-bp-ph-gatesvr-p-01  ansible_host=10.147.7.71
+g20-ewallet-prod-bp-ph-gatesvr-p-02  ansible_host=10.147.7.59
+g20-ewallet-prod-bp-ph-gatesvr-p-03  ansible_host=10.147.7.144
+g20-ewallet-prod-bp-ph-gatesvr-p-04  ansible_host=10.147.7.145
+g20-ewallet-prod-bp-ph-gatesvr-p-05  ansible_host=10.147.7.49
+g20-ewallet-prod-bp-ph-gatesvr-p-06  ansible_host=10.147.7.118
+g20-ewallet-prod-bp-ph-gatesvr-p-07  ansible_host=10.147.7.55
+g20-ewallet-prod-bp-ph-gatesvr-p-08  ansible_host=10.147.7.41
+g20-ewallet-prod-bp-ph-gateway-01  ansible_host=10.147.7.193
+g20-ewallet-prod-bp-ph-gateway-02  ansible_host=10.147.7.178
+g20-ewallet-prod-bp-ph-gateway-03  ansible_host=10.147.7.128
+g20-ewallet-prod-bp-ph-gcp-gi-01  ansible_host=10.147.7.149
+g20-ewallet-prod-bp-ph-gcp-gi-02  ansible_host=10.147.7.148
+g20-ewallet-prod-bp-ph-gcp-web-01  ansible_host=10.147.7.133
+g20-ewallet-prod-bp-ph-gcp-web-02  ansible_host=10.147.7.155
+g20-ewallet-prod-bp-ph-center_p-01  ansible_host=10.147.7.89
+g20-ewallet-prod-bp-ph-cms-01  ansible_host=10.147.7.92
+g20-ewallet-prod-bp-ph-dc-api-01  ansible_host=10.147.7.94
+g20-ewallet-prod-bp-ph-dc-api-02  ansible_host=10.147.7.96
+g20-ewallet-prod-bp-ph-game-api-01  ansible_host=10.147.7.97
+g20-ewallet-prod-bp-ph-game-api-02  ansible_host=10.147.7.101
+
+
+
+gcp-manager-web-layer.conf:    server_name gcp-manager-web.g22-prod.com;
+gcp-portal-web-layer.conf:    server_name gcp-portal-web.g22-prod.com gcp-portal-web-cf.g22-prod.com;
+gcp-dc-api.conf:    server_name gcp-dc-api.g22-prod.com;
+gcp-game-api.conf:    server_name gcp-game-api.g22-prod.com;
+gcp-gi.conf:    server_name gcp-gi.g22-prod.com gcp-gi-2.g22-prod.com;
+gateway.conf:    server_name  gateway.g22-prod.com ; 
+gcp-portal-api-layer.conf:    server_name gcp-portal-api.g22-prod.com gcp-portal-api-cf.g22-prod.com;
+gcp-web.conf:    server_name g20-ewallet-gcp-web.g20-prod.com
+
+gcp-web.g20ewallet-prod.com
+gcp-portal-api.g20ewallet-prod.com
+gateway.g20ewallet-prod.com
+gcp-gi.g20ewallet-prod.com
+gcp-game-api.g20ewallet-prod.com
+gcp-dc-api.g20ewallet-prod.com
+gcp-portal-web.g20ewallet-prod.com 
+gcp-manager-web.g20ewallet-prod.com
+
+g22-prod.g22cfzone.com.
+
+
+logsvr.g20ewallet-prod.com
+http://logsvr.g20ewallet-prod.com/login?
+
+
+
+sed  's/g22-prod\.com\.key/g20ewallet-prod\.com\.key/g' *.conf
+
+g22-prod.com.key
+
+
+
+10.160.0.16
+
+10.147.7.162
+10.147.7.77
+clustermgr.g20ewallet-prod.com
+clustermgr-ws.g20ewallet-prod.com
+nacos.g20ewallet-prod.com
+
+
+
+cms    java  
+manager-api java
+portl-api java
+game-api java
+gateway  java
+gcp-gi java
+gcp-web java
+dc-api  java  21.0.3
+
+
+gatesvr-p  c++
+walletsvr-p c++
+website-walletsvr-p- c++
+center_p  c++
+
+
+g20-ewallet-bp-java
+g20-ewallet-bp-c++
+
+/etc/ansible/inventory/G20_ewallet/G20_ewallet_all
+
+ansible-playbook -i /etc/ansible/inventory/G20_ewallet/G20_ewallet_all /etc/ansible/ProjConfigure/installJdk.yaml --extra-vars "hosts=g20-ewallet-bp-java jdk=21.0.3" --check --diff -vv 
+ansible -i /etc/ansible/inventory/G20_ewallet/G20_ewallet_prod_hosts G20-ewallet-gcp_cms -m unarchive  -a "src=/tmp/openjdk-21_linux-x64_bin.tar.gz dest=/data/" 
+ansible -i /etc/ansible/inventory/G20_ewallet/G20_ewallet_prod_hosts G20-ewallet-gcp_cms -m shell  -a "sh /data/g20/clustermgr_agent/WebRoot/start.sh" 
+ansible -i /etc/ansible/inventory/G20_ewallet/G20_ewallet_all g20-ewallet-bp-java -m unarchive  -a "src=/tmp/openjdk-21_linux-x64_bin.tar.gz dest=/data/" 
+
+
+ansible your_remote_host_group -m unarchive -a "src=/path/to/openjdk-21_linux-x64_bin.tar.gz dest=/path/to/destination/ remote_src=yes" -i /path/to/your/inventory
+
+sh /data/g20/clustermgr_agent/WebRoot/start.sh
+10.160.0.30  8088
+10.147.7.91
+
+c++ 环境  未准备
+nacos 数据库信息 10.147.7.176  3307 
+nacos 未部署
+所有服务未启动
+所有服务配置文件未配置
+clustermgr-agent 服务未启动
+
+
+g20-ewallet-prod_G22_center_p-(CCC)	
+
+
+g20-ewallet-prod-bp-ph-cms-01  ansible_host=10.147.7.92
+g20-ewallet-prod-bp-ph-manager-api-01  ansible_host=10.147.7.90
+g20-ewallet-prod-bp-ph-portl-api-01  ansible_host=10.147.7.10
+g20-ewallet-prod-bp-ph-portl-api-02  ansible_host=10.147.7.99
+g20-ewallet-prod-bp-ph-game-api-01  ansible_host=10.147.7.97
+g20-ewallet-prod-bp-ph-game-api-02  ansible_host=10.147.7.101
+g20-ewallet-prod-bp-ph-game-api-03  ansible_host=10.147.7.151
+g20-ewallet-prod-bp-ph-game-api-04  ansible_host=10.147.7.52
+g20-ewallet-prod-bp-ph-gateway-01  ansible_host=10.147.7.193
+g20-ewallet-prod-bp-ph-gateway-02  ansible_host=10.147.7.178
+g20-ewallet-prod-bp-ph-gateway-03  ansible_host=10.147.7.128
+g20-ewallet-prod-bp-ph-gcp-gi-01  ansible_host=10.147.7.149
+g20-ewallet-prod-bp-ph-gcp-gi-02  ansible_host=10.147.7.148
+g20-ewallet-prod-bp-ph-gcp-web-01  ansible_host=10.147.7.133
+g20-ewallet-prod-bp-ph-gcp-web-02  ansible_host=10.147.7.155
+g20-ewallet-prod-bp-ph-dc-api-01  ansible_host=10.147.7.94
+g20-ewallet-prod-bp-ph-dc-api-02  ansible_host=10.147.7.96
+
+
+ansible -i G20_ewallet_all g20-ewallet-bp-java-c++ -m shell -a "echo '' | telnet 10.147.107.2 27022 | grep 'Es'"
+ansible -i G20_ewallet_all g20-ewallet-bp-java-c++ -m shell -a "echo '' | telnet 10.147.107.3 27022 | grep 'Es'"
+ansible -i G20_ewallet_all g20-ewallet-bp-java-c++ -m shell -a "echo '' | telnet 10.147.7.12 7000 | grep 'Es'"
+ansible -i G20_ewallet_all g20-ewallet-bp-java-c++ -m shell -a "echo '' | telnet 10.147.7.21 7000 | grep 'Es'"
+ansible -i G20_ewallet_all g20-ewallet-bp-java-c++ -m shell -a "echo '' | telnet 10.147.7.45 7000 | grep 'Es'"
+ansible -i G20_ewallet_all g20-ewallet-bp-java-c++ -m shell -a "echo '' | telnet 10.147.7.102 7000 | grep 'Es'"
+ansible -i G20_ewallet_all g20-ewallet-bp-java-c++ -m shell -a "echo '' | telnet 10.147.7.154 7000 | grep 'Es'"
+ansible -i G20_ewallet_all g20-ewallet-bp-java-c++ -m shell -a "echo '' | telnet 10.147.7.171 7000 | grep 'Es'"
+
+
+rsync -avz files@10.146.40.160::G04_retrysvr_go /data/g04/G04_retrysvr_go/ --password-file=/root/rsync.password
+rsync -avz files@10.146.40.160::G13_retrysvr_go /data/g13/G13_retrysvr_go/ --password-file=/root/rsync.password
+

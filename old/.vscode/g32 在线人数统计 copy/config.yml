@@ -1,0 +1,24 @@
+---
+- project: g04
+  method: POST
+  url: https://g04-goodway-p.g04backend.com/getOnlineNum
+- project: g09
+  method: POST
+  url: https://goodway-p.g09game.com/getOnlineNum       
+- project: g13
+  method: POST
+  url: https://goodway-p.g13game.com/getOnlineNum
+- project: g16
+  method: POST
+  url: https://goodway.prodg16.com/getOnlineNum
+- project: g20
+  method: POST
+  url: https://gi-goodway.g20-prod.com/getOnlineNum
+- project: g23
+  method: POST
+  url: https://gdc-goodway.g23-prod.com/getOnlineNum
+- project: ppu
+  method: POST
+  url: https://message-client.g32-uat.com/session/count
+
+

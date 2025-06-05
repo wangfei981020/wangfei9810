@@ -1,0 +1,37 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: g38-istio-ingressgateway-inner
+  namespace: istio-system
+spec:
+  selector:
+    istio: g38-istio-ingressgateway-inner
+  servers:
+  - hosts:
+    - '*.g38-prod.com'
+    port:
+      name: http2
+      number: 80
+      protocol: HTTP
+    tls:
+      httpsRedirect: false
+
+  - hosts:
+    - '*.g38-prod.com'
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: g38-prod-com-cert
+      minProtocolVersion: TLSV1_2
+
+  - hosts:
+    - '*'
+    port:
+      name: mongodb
+      number: 27017
+      protocol: TCP
+
+

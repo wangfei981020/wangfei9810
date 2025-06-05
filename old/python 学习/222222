@@ -1,0 +1,65 @@
+
+ansible -i G22_nginx_hosts G22-nginx -m shell -a "tcping 10.147.12.140 8888"
+
+
+
+
+
+upstream logsvr {
+   server  10.147.12.140:8888 max_fails=3 fail_timeout=10s;
+}
+
+10.147.7.27
+10.147.7.38
+
+
+
+
+volumeMounts:
+  - name: {{ $.Release.Name }}-log-pvc-{{ .PodName | regexReplaceAll ".*-(\\d+)$" "$1" }}  # 通过 Pod 名称引用正确的 PVC
+    mountPath: /app/logs-{{ .PodName | regexReplaceAll ".*-(\\d+)$" "$1" }}
+
+
+•      DC147_G22_nginx_layer_prod_120.89.34.8_80_10.147.7.27_80 
+•      DC147_G22_nginx_layer_prod_120.89.34.8_443_10.147.7.27_443 
+•      DC147_G22_nginx_layer_prod_210.57.33.164_80_10.147.7.38_80 
+•      DC147_G22_nginx_layer_prod_210.57.33.164_443_10.147.7.38_443
+
+nginx 03
+120.89.34.8
+
+nginx 04
+210.57.33.164
+
+logsvr.g22-prod.com
+gateway.g22-prod.com
+gcp-dc-api.g22-prod.com
+gcp-game-api.g22-prod.com
+gcp-gi.g22-prod.com
+gcp-manager-web.g22-prod.com
+gcp-portal-api.g22-prod.com
+gcp-portal-web.g22-prod.com
+gcp-web.g22-prod.com
+
+
+gci-web.g20gli.com
+gi-game.g20gli.com
+images.g20gli.com
+anchor-web.g20gli.com
+agent-web.g20gli.com
+
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar game-platform-api-web.jar --spring.cloud.nacos.config.namespace=g20-gci --spring.cloud.nacos.discovery.namespace=g20-gci
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -jar game-platform-api-web.jar --spring.cloud.nacos.config.namespace=g20-gci --spring.cloud.nacos.config.group=g20-gci --spring.cloud.nacos.config.name=platform-web --spring.cloud.nacos.discovery.namespace=g20-gci
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.3 -DREGISTER_PORT=8848 -jar game-platform-api-web.jar --spring.cloud.nacos.config.namespace=g20-tidb-gci --spring.cloud.nacos.config.group=g20-tidb-gci --spring.cloud.nacos.config.name=platform-web --spring.cloud.nacos.discovery.namespace=g20-tidb-gci
+
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -jar game-platform-api-web.jar --spring.cloud.nacos.config.namespace=g20-tidb-gci --spring.cloud.nacos.config.group=g20-tidb-gci --spring.cloud.nacos.config.name=platform-web --spring.cloud.nacos.discovery.namespace=g20-tidb-gci
+
+
+
+java -Xms2024m -Xmx4048m -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.18 -DREGISTER_PORT=8848 -DNACOS_USER=nacos -DNACOS_PWD=nacos -jar g20-game-client-api-goodway.jar --spring.cloud.nacos.config.namespace=g20-tidb-gci --spring.cloud.nacos.discovery.namespace=g20-tidb-gci --spring.cloud.nacos.config.name=client-goodway
+
+java -Dfile.encoding=UTF-8 -DREGISTER_HOST=10.161.64.3 -DREGISTER_PORT=8848 -jar g20-game-client-api-goodway.jar --spring.cloud.nacos.config.namespace=g20-tidb-gi --spring.cloud.nacos.config.group=g20-tidb-gi --spring.cloud.nacos.config.name=client-goodway-2 --spring.cloud.nacos.discovery.namespace=g20-tidb-gi

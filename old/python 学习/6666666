@@ -1,0 +1,19 @@
+argocd_app_info{autosync_enabled="true", container="application-controller", dest_namespace="g101-uat", dest_server="https://kubernetes.default.svc", endpoint="http-metrics", exported_namespace="argocd", health_status="Progressing", instance="172.16.6.29:8082", job="argocd-application-controller-metrics", name="agent-api-backend-g101-uat", namespace="argocd", pod="argocd-application-controller-0", project="g101-uat", repo="https://gitlab-devops.slleisure.com/argocd/ppu-k8s-platform", service="argocd-application-controller-metrics", sync_status="Synced"}
+
+
+name
+dest_namespace
+health_status
+
+
+{{- if .TagsMap.health_status }}
+**Status:** {{ .TagsMap.health_status }}
+{{- else if .TagsMap.phase}}
+**Status:** {{ .TagsMap.phase }}
+{{- end }}
+
+{{- if .TagsMap.name }}
+**Pod:** {{ .TagsMap.name }}
+{{- else if .TagsMap.pod}}
+**Pod:** {{ .TagsMap.pod }}
+{{- end }}

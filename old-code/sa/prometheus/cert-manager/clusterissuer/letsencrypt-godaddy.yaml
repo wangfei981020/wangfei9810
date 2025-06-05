@@ -1,0 +1,25 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: sl.kerbos@protonmail.com
+    privateKeySecretRef:
+      name: letsencrypt
+    solvers:
+    - selector:
+        dnsZones:
+        - 'g32-prod.com'
+      dns01:
+        webhook:
+          config:
+            apiKeySecretRef:
+              name: gHKpL1wzGXXE_NXgMVzdEKpFicwDnfMR2cG
+              key: token2S5hwG1crZtoTbrC4ficqY
+            production: true
+            ttl: 600
+          groupName: acme.g32-prod.com
+          solverName: godaddy

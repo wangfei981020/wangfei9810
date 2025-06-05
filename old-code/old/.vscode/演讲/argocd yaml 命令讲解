@@ -1,0 +1,27 @@
+apiVersion：指定 API 的版本（argoproj.io/v1alpha1），表示这是 ArgoCD 的资源类型。
+kind：指定资源的类型（Application），表示这个资源是 ArgoCD 应用程序对象
+metadata：定义 ArgoCD 应用的元数据。
+name：应用的名称（app-of-apps-g32-uat）。这是 ArgoCD 应用对象的唯一标识。
+namespace：应用所在的 Kubernetes 命名空间。这里是 argocd，通常表示 ArgoCD 的管理命名空间。
+finalizers：这是一个特殊的字段，用来指定删除时需要执行的操作。resources-finalizer.argocd.argoproj.io 是 ArgoCD 自带的一个 finalizer，用于删除相关的 Kubernetes 资源。
+project：定义了 ArgoCD 应用所在的 项目（g32-uat）。项目有助于组织多个应用，控制访问权限和资源配额等
+source：指定应用程序的源（通常是 Git 仓库或者 Helm 仓库）。
+repoURL：Git 仓库的 URL，这里指定了一个 GitLab 仓库，包含 Helm chart 和应用配置（https://gitlab-devops.slleisure.com/argocd/ppu-k8s-platform.git）。
+targetRevision：指示要部署的 Git 分支或提交，HEAD 表示使用仓库中的最新提交。
+path：在 Git 仓库中应用程序 Helm chart 的路径。在这里，应用程序 Helm chart 存储在 argocd-apps/charts/g32-uat-apps 目录中。
+helm：指定 Helm chart 配置。
+valueFiles：指定 Helm 的 values.yaml 文件路径。这里是 values.yaml 文件，它用来传递给 Helm chart 以覆盖默认值
+destination：指定目标集群和命名空间。
+server：Kubernetes 集群的 API 服务器地址。https://kubernetes.default.svc 是 Kubernetes 集群的默认地址。
+namespace：目标 Kubernetes 命名空间（g32-uat）。此命名空间是应用将在其中部署的命名空间。
+syncPolicy：定义 ArgoCD 应用的同步策略。
+retry：定义同步失败时的重试策略。
+backoff：指定重试的间隔策略。
+duration：首次重试的延迟时间（4 秒）。
+factor：每次重试的延迟时间增长因子（每次延迟时间为上次的 2 倍）。
+maxDuration：最大延迟时间（17 分钟），即重试延迟最大不会超过 17 分钟。
+automated：自动同步设置。
+selfHeal：如果应用被手动修改（例如通过 kubectl），ArgoCD 会尝试恢复应用的原始配置（true）。
+prune：自动删除不再在 Git 仓库中存在的资源（true）。这意味着，如果 Git 中删除了某个资源，它会在集群中自动被删除。
+syncOptions：
+CreateNamespace=true：在目标命名空间不存在时，自动创建命名空间
