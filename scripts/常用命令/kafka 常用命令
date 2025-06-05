@@ -1,0 +1,4 @@
+# 查看所有主题（Topics）
+./kafka-topics.sh --bootstrap-server localhost:9092 --list
+# 查看特定主题的详细信息
+./kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic topic-name

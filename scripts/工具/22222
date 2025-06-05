@@ -1,0 +1,25 @@
+sum(container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", namespace!="g32-tidb",namespace=~"g32.*",pod!~"anetd.*",service="kube-prometheus-stack-kubelet",container!="", image!=""}) by (namespace,pod) / sum(cluster:namespace:pod_memory:active:kube_pod_container_resource_limits{ namespace!="g32-tidb",namespace=~"g32.*"}) by (namespace,pod) * 100 >= 80
+
+
+
+sum(
+    container_memory_working_set_bytes{ namespace=~"g32.*",namespace!~".*tidb", container!="", image!=""}
+  * on(namespace,pod)
+    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~"g32.*",namespace!~".*tidb"}
+) by (pod)
+/sum(
+    kube_pod_container_resource_requests{job="kube-state-metrics", namespace=~"g32.*",namespace!~".*tidb", resource="memory"}
+  * on(namespace,pod)
+    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~"g32.*",namespace!~".*tidb"}
+) by (pod) *100 >= 80
+
+
+
+sum(
+  container_memory_working_set_bytes{ namespace=~"g32.*",namespace!~".*tidb", container!="", image!=""}
+
+) by (pod)
+/sum(
+  kube_pod_container_resource_requests{job="kube-state-metrics", namespace=~"g32.*",namespace!~".*tidb", resource="memory"}
+
+) by (pod) *100 >= 80

@@ -1,0 +1,47 @@
+
+kubectl create serviceaccount argocd-manager -n kube-system
+kubectl create clusterrolebinding argocd-manager-role \
+  --clusterrole=cluster-admin \
+  --serviceaccount=kube-system:argocd-manager
+  
+ 
+kubectl apply -f ServiceAccount.yaml 
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argocd-manager-secret
+  namespace: kube-system
+  annotations:
+    kubernetes.io/service-account.name: argocd-manager
+type: kubernetes.io/service-account-token
+
+
+# 获取Token
+TOKEN=$(kubectl get secret argocd-manager-secret -n kube-system -o jsonpath='{.data.token}' | base64 -d)
+
+# 获取CA证书（Base64编码）
+CA_DATA=$(kubectl get secret argocd-manager-secret -n kube-system -o jsonpath='{.data.ca\.crt}')
+
+
+infra 执行 
+
+kubectl apply -f gke-cluster-secret.yaml -n argocd 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cesar-test-gke
+  labels:
+    argocd.argoproj.io/secret-type: cluster
+type: Opaque
+stringData:
+  name: cesar-test-gke         
+  server: https://10.161.177.8  
+  config: |
+    {
+      "bearerToken": "${TOKEN}", 
+      "tlsClientConfig": {
+        "insecure": false,
+        "caData": "${CA_DATA}" 
+      }
+    }

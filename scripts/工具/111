@@ -1,0 +1,38 @@
+kubectl exec -it loki-resource-test-75b8585599-xcg9x -c loki-resource -n g32-uat -- \
+  curl -X POST http://localhost:4318/v1/traces \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resourceSpans": [
+      {
+        "resource": {
+          "attributes": [
+            {
+              "key": "service.name",
+              "value": { "stringValue": "loki-resource" }
+            }
+          ]
+        },
+        "scopeSpans": [
+          {
+            "spans": [
+              {
+                "trace_id": "5b8aa5a2d9c459b5a8b1f0d7a0c7f6e3",  
+                "span_id": "7d3e8b1a9f4c2d6b",                    
+                "parent_span_id": "",                             
+                "name": "manual-span",
+                "kind": 1,                                        
+                "start_time_unix_nano": "1712256000000000000",   
+                "end_time_unix_nano": "1712256001000000000",      
+                "attributes": [
+                  {
+                    "key": "test.attribute",
+                    "value": { "stringValue": "test-value" }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }'

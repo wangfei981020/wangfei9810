@@ -1,0 +1,2 @@
+# 循环请求
+for i in {1..1000}; do curl -I http://127.0.0.1:8088/actuator/health/readiness; sleep 1 ;done

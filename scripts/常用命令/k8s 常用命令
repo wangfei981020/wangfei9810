@@ -1,0 +1,17 @@
+#  获取 pod 启动时间
+for pod in $(kubectl get pods -n ns-name -o jsonpath='{.items[*].metadata.name}'); do
+  start_time=$(kubectl get pod "$pod" -n ns-name -o jsonpath='{.status.startTime}')
+  uptime_sec=$(($(date -u +%s) - $(date -u -d "$start_time" +%s)))
+  echo "Pod: $pod"
+  echo "  Start Time: $start_time"
+  echo "  Uptime: ${uptime_sec}s"
+done
+
+# 命名空间开启istio 注入
+kubectl label namespace ns-name istio-injection=enabled
+
+# 取消命名空间注入 istio
+kubectl label namespace ns-name istio-injection-
+
+# 动态查看 svc ip
+watch -n 1 "kubectl get endpoints svc-name -n ns-name -o jsonpath='{.subsets[*].addresses[*].ip}'"

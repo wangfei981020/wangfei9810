@@ -1,0 +1,22 @@
+curl -v -X POST \
+-H "Content-Type: application/json" \
+"http://ppu-loki-scalable.slleisure.com/loki/api/v1/query_range" \
+-d '{
+  "query": "{namespace=\"g32-uat\",container=~\"baccarat-resource.*\"}",
+  "start": 1711526400000000000,
+  "end": 1711526700000000000,
+  "step": 15
+}'
+
+
+curl -G -s  "http://ppu-loki-scalable.slleisure.com/loki/api/v1/query_range" \
+  --data-urlencode 'query={namespace=\"g32-uat\",container=~\"baccarat-resource.*\"}' 
+  
+  
+curl -G -s "http://ppu-loki-scalable.slleisure.com/loki/api/v1/query_range" \
+  --data-urlencode 'query={namespace="g32-uat",container=~"baccarat-resource.*"}|~"Link.* timestamp.* Round.*"' \
+  --data-urlencode 'start=1743054600' \
+  --data-urlencode 'end=1743054900' \
+  --data-urlencode 'step=300' 
+  | jq .
+

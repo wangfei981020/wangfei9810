@@ -1,0 +1,13 @@
+jenkins:
+  project_name: g22
+  env: uat
+  jenkins_uat: https://uat-jenkins.slleisure.com
+  jenkins_gli: https://uat-jenkins.slleisure.com
+  jenkins_prod: https://jk.slleisure.com
+  username: cesar
+  password: cesar-526
+  # UAT 模板
+  source_job_name: G01_template_vm_job
+  # view_name: PPU-K8S-G35-UAT
+  view_name: G22-UAT
+
