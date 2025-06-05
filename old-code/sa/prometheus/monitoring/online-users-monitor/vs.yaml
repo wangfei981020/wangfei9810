@@ -1,0 +1,19 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: online-users-k8s-servicemonitor
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  endpoints:
+    - interval: 60s
+      path: /metrics
+      port: metrics
+  namespaceSelector:
+    matchNames:
+      - online-users
+  selector:
+    matchLabels:
+      micrometer-prometheus-discovery: 'true'

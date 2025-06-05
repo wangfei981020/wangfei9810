@@ -1,0 +1,28 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  annotations:
+  name: otb1-istio-ingressgateway-extra
+  namespace: istio-system
+spec:
+  selector:
+    istio: otb1-istio-ingressgateway-extra
+  servers:
+  - hosts:
+    - '*.otb1-prod.com'
+    port:
+      name: http2
+      number: 80
+      protocol: HTTP
+    tls:
+      httpsRedirect: false
+  - hosts:
+    - '*.otb1-prod.com'
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: otb1-prod-com-cert
+      minProtocolVersion: TLSV1_2

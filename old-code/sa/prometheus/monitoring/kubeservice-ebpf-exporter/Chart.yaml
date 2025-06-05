@@ -1,0 +1,25 @@
+annotations:
+  artifacthub.io/maintainers: |
+    - name: dongjiang
+      email: dongjiang1989@126.com
+  artifacthub.io/signKey: |
+    fingerprint: 54145DF6791F044DDB2C9219F42BCA7408363131
+    url: https://kubeservice-stack.github.io/kubservice-charts/pgp_keys.asc
+apiVersion: v2
+appVersion: v2.3.0
+description: A Helm chart for ebpf_exporter
+home: https://github.com/kubeservice-stack/kubservice-charts
+icon: https://kubeservice-stack.github.io/kubservice-charts/logo.png
+keywords:
+- metric
+- prometheus
+- kubernetes
+- ebpf
+maintainers:
+- email: dongjiang1989@126.com
+  name: dongjiang
+name: kubeservice-ebpf-exporter
+sources:
+- https://github.com/kubeservice-stack/ebpf_exporter
+type: application
+version: 1.2.1

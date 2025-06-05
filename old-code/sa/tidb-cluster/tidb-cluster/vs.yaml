@@ -1,0 +1,114 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  labels:
+    app.kubernetes.io/instance: tidb-monitor
+    app.kubernetes.io/name: tidb-cluster
+  name: tidb-grafana
+  namespace: g101-tidb
+spec:
+  gateways:
+  - istio-system/g101-istio-ingressgateway-inner
+  hosts:
+  - tidb-grafana.g101-prod.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: tidb-monitor-grafana.g101-tidb.svc.cluster.local
+        port:
+          number: 3000
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  labels:
+    app.kubernetes.io/instance: g101-tidb-dashboard
+    app.kubernetes.io/name: tidb-dashboard
+  name: tidb-dashboard
+  namespace: g101-tidb
+spec:
+  gateways:
+  - istio-system/g101-istio-ingressgateway-inner
+  hosts:
+  - tidb-ui.g101-prod.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: tidb-dashboard-tidb-dashboard-exposed.g101-tidb.svc.cluster.local
+        port:
+          number: 12333
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  labels:
+    app.kubernetes.io/component: pd
+    app.kubernetes.io/instance: g101-prod
+    app.kubernetes.io/name: tidb-cluster
+  name: g101-prod-tidb-pd
+  namespace: g101-tidb
+spec:
+  gateways:
+  - istio-system/g101-istio-ingressgateway-inner
+  hosts:
+  - g101-prod-tidb.g101-tidb.svc.cluster.local
+  tcp:
+  - match:
+    - port: 2379
+    route:
+    - destination:
+        host: g101-prod-pd.g101-tidb.svc.cluster.local
+        port:
+          number: 2379
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  labels:
+    app.kubernetes.io/component: tidb
+    app.kubernetes.io/instance: g101-prod
+    app.kubernetes.io/name: tidb-cluster
+  name: g101-prod-tidb-4000
+  namespace: g101-tidb
+spec:
+  gateways:
+  - istio-system/g101-istio-ingressgateway-inner
+  hosts:
+  - g101-prod-tidb.g101-tidb.svc.cluster.local
+  tcp:
+  - match:
+    - port: 4000
+    route:
+    - destination:
+        host: g101-prod-tidb.g101-tidb.svc.cluster.local
+        port:
+          number: 4000
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  labels:
+    app.kubernetes.io/component: tidb
+    app.kubernetes.io/instance: g101-prod
+    app.kubernetes.io/name: tidb-cluster
+  name: g101-prod-tidb-10080
+  namespace: g101-tidb
+spec:
+  gateways:
+  - istio-system/g101-istio-ingressgateway-inner
+  hosts:
+  - g101-prod-tidb.g101-tidb.svc.cluster.local
+  tcp:
+  - match:
+    - port: 10080
+    route:
+    - destination:
+        host: g101-prod-tidb.g101-tidb.svc.cluster.local
+        port:
+          number: 10080

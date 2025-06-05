@@ -1,0 +1,127 @@
+rbac:
+  create: true
+  pspEnabled: true
+serviceAccount:
+  create: true
+  name:
+
+replicaCount: 1
+image:
+  repository: oliver006/redis_exporter
+  pullPolicy: IfNotPresent
+  tag: ""
+
+command: []
+
+extraArgs: {}
+
+customLabels: {}
+
+securityContext: {}
+
+env: {}
+
+service:
+  type: ClusterIP
+  port: 9121
+  portName: redis-exporter
+  annotations: {}
+  labels: {}
+resources:
+  limits:
+    cpu: 200m
+    memory: 200Mi
+  requests:
+    cpu: 100m
+    memory: 100Mi
+
+nodeSelector:
+  tier: app
+
+tolerations: []
+
+affinity: {}
+
+priorityClassName: ""
+
+extraManifests: []
+
+# If serviceMonitor.multipleTarget is enabled, this configuration is actually not used
+redisAddress: redis://myredis:6379
+
+annotations: {}
+labels: {}
+
+redisAddressConfig:
+  enabled: false
+  isSecret: false
+  source:
+    name: ""
+    key: ""
+
+redisTlsConfig:
+  enabled: false
+  skipTlsVerification: false
+  mountPath: /tls
+
+  caCertFile:
+    secret:
+      name: ""
+      key: ""
+  clientKeyFile:
+    secret:
+      name: ""
+      key: ""
+  clientCertFile:
+    secret:
+      name: ""
+      key: ""
+  serverKeyFile:
+    secret:
+      name: ""
+      key: ""
+  serverCertFile:
+    secret:
+      name: ""
+      key: ""
+
+serviceMonitor:
+  enabled: true
+  multipleTarget: true
+  targets:
+    - name: g32-prod-redis
+      url: "redis://redis-cluster.redis.svc:6379"
+  additionalMetricsRelabels: {}
+  additionalRelabeling: []
+  #namespace: monitoring
+  #interval: 30s
+  telemetryPath: /scrape
+  labels:
+    release: kube-prometheus-stack
+  # timeout: 10s
+  # relabelings: []
+  # targetLabels: []
+  # metricRelabelings: []
+  # scheme: ""
+  # tlsConfig: {}
+
+prometheusRule:
+  enabled: false
+  additionalLabels: {}
+  namespace: ""
+  rules: []
+
+auth:
+  enabled: true
+  secret:
+    name: ""
+    key: ""
+  redisPassword: "BZLKiVpsOR"
+  redisUser: ""
+  redisPasswordFile:
+    mountPath: /auth
+    secret:
+      name: ""
+      key: ""
+
+podSecurityContext: {}

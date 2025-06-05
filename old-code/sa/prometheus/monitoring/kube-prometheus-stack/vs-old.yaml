@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  gateways:
+    - istio-system/istio-ingressgateway-inner
+  hosts:
+    - prometheus-old.g32-prod.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: kube-prometheus-stack-prometheus.monitoring.svc.cluster.local
+        port:
+          number: 9090

@@ -1,0 +1,22 @@
+apiVersion: pingcap.com/v1alpha1
+kind: TidbDashboard
+metadata:
+  name: tidb-dashboard
+  namespace: g101-tidb
+spec:
+  baseImage: pingcap/tidb-dashboard
+  version: latest
+
+  clusters:
+    - name: g101-prod
+
+  requests:
+    cpu: 200m
+    memory: 0.5Gi
+    storage: 20Gi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+  service:
+    type: ClusterIP

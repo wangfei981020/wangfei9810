@@ -1,0 +1,18 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: g32-k8s-servicemonitor
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  endpoints:
+    - interval: 30s
+      path: /actuator/prometheus
+      port: metrics
+  namespaceSelector:
+     any: true
+  selector:
+    matchLabels:
+      micrometer-prometheus-discovery: 'true'

@@ -1,0 +1,116 @@
+# ApplicationInstanceDown - K8S
+up{namespace=~"g32.*",container!~"base-task-backend|chat-client-backend"} == 0
+
+# PersistentvolumeclaimOutOfSpace - K8S
+(kubelet_volume_stats_used_bytes{persistentvolumeclaim!=""} / kubelet_volume_stats_capacity_bytes{persistentvolumeclaim!=""}) * 100 > 90
+
+# Pod Cpu usage exceeds 90% - k8S
+sum(rate(container_cpu_usage_seconds_total{namespace!="g32-tidb",namespace=~"g32.*",service="kube-prometheus-stack-kubelet", container!=""}[5m])*100) by (namespace,pod) / sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits{ namespace!="g32-tidb",namespace=~"g32.*"}) by (namespace,pod) >= 90
+
+# Pod Disk IOPS is too high - K8S
+ceil(sum by(namespace,pod) (rate(container_fs_reads_total{container!="", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)", namespace!="g32-tidb",namespace!="g32-tidb",namespace=~"g32.*"}[5m]) + rate(container_fs_writes_total{container!="", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)", namespace!="g32-tidb",namespace=~"g32.*"}[5m]))) > 20
+
+# Pod Disk ThroughPut is too high - K8S
+sum by(namespace,pod) (rate(container_fs_reads_bytes_total{container!="", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)", namespace!="g32-tidb",namespace=~"g32.*"}[5m]) + rate(container_fs_writes_bytes_total{container!="", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)", namespace!="g32-tidb",namespace=~"g32.*"}[5m]))  > 157286400
+
+# Pod Memory usage exceeds 90% - K8S
+sum(container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", namespace!="g32-tidb",namespace=~"g32.*",pod!~"anetd.*",service="kube-prometheus-stack-kubelet",container!="", image!=""}) by (namespace,pod) / sum(cluster:namespace:pod_memory:active:kube_pod_container_resource_limits{ namespace!="g32-tidb",namespace=~"g32.*"}) by (namespace,pod) * 100 >= 90
+
+# Pod receive is too high - K8S
+sum(rate(container_network_receive_bytes_total{ namespace!="g32-tidb",namespace=~"g32.*",pod!~"eks-pod-identity.*|kube-prometheus-stack-prometheus.*|kube-proxy.*|aws-node.*"}[5m])) by (namespace,pod) > 20971520
+
+# Pod Status  Alarm - K8S
+kube_pod_status_phase{namespace!="g32-tidb",namespace=~"g32.*",phase!~"Running|Succeeded"} != 0
+
+# Pod that exited with error - K8S
+kube_pod_container_status_last_terminated_exitcode{exit_code!="0",namespace!="g32-tidb",namespace=~"g32.*",container!~"base-task-backend|chat-client-backend"}
+  and
+  on(pod, namespace) kube_pod_container_status_running==0
+
+# Pod Transmit is too high - K8S
+sum(rate(container_network_transmit_bytes_total{namespace!="g32-tidb",namespace=~"g32.*",pod!~"kube-prometheus-stack.*|eks-pod-identity.*|kube-proxy.*|aws-node.*"}[5m])) by (namespace,pod) > 20971520
+
+
+# HostHighCpuLoad - Basic
+(100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100)) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"} > 90
+
+# HostInstanceDown - Basic
+up{container="node-exporter",tier!="db"} == 0
+
+# HostOomKillDetected - Basic
+(increase(node_vmstat_oom_kill[1m])) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"} > 0
+
+# HostOutOfDiskSpace - Basic
+((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 10 and ON (instance, device, mountpoint) node_filesystem_readonly) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+
+# HostUnusualNetworkThroughput - Basic
+(sum by (instance) (rate(node_network_receive_bytes_total[2m])) / 1024 / 1024 > 100 or sum by (instance) (rate(node_network_transmit_bytes_total[2m])) / 1024 / 1024) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"} > 100
+
+# CPU Utilisation
+100 * (1 - sum(rate(node_cpu_seconds_total{mode="idle",tier="middleware"}[5m])) / sum(count(node_cpu_seconds_total{mode="idle",tier="middleware"})))
+
+# Memory Utilisation
+100 * (sum(node_memory_MemTotal_bytes{tier="middleware"}) - sum(node_memory_MemAvailable_bytes{tier="middleware"})) / sum(node_memory_MemTotal_bytes{tier="middleware"})
+
+# CPU Requests
+avg(100 * sum(kube_pod_container_resource_requests{resource="cpu"}) by (node) 
+  / 
+  sum(instance:node_num_cpu:sum{tier="middleware"}) by (node)
+)
+
+# Memory Requests
+avg((
+  sum(kube_pod_container_resource_requests{resource="memory", node!=""}) by (node)
+  / 
+  sum(kube_node_status_allocatable{resource="memory", node!=""}) by (node)
+  * 100
+)
+and on(node) 
+node_memory_MemTotal_bytes{tier="middleware"})
+
+### 夜莺活跃告警
+SELECT 
+    1 AS "Status",  -- 新增列，用于标记红色状态
+    group_name AS env,
+    rule_name,
+    trigger_value AS value,
+    IF(LOCATE('nodename=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'nodename=', -1), ',', 1),
+        '') AS nodename,
+    IF(LOCATE('namespace=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'namespace=', -1), ',', 1),
+        '') AS namespace,
+    IF(LOCATE('container=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'container=', -1), ',', 1),
+        '') AS container,
+    IF(LOCATE('instance=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'instance=', -1), ',', 1),
+        '') AS instance,
+    IF(LOCATE('project=', original_tags) > 0, 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(original_tags, 'project=', -1), ',', 1),
+        '') AS project
+FROM 
+    alert_cur_event
+WHERE 
+    group_name IN ($alert_env)
+
+-- 如果没有数据，则返回一行默认数据
+UNION ALL
+
+SELECT 
+    0 AS "Status",  -- 默认状态为 0
+    '' AS env, 
+    '' AS rule_name,
+    '' AS value,
+    '' AS nodename,
+    '' AS namespace,
+    '' AS container,
+    '' AS instance,
+    '' AS project
+WHERE 
+    NOT EXISTS (SELECT 1 FROM alert_cur_event WHERE group_name IN ($alert_env));
+
+
+# 事件通知
+{container="event-exporter"} | json | type != "Normal"  
+

@@ -1,0 +1,65 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki-read
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+    - logging
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: read
+      app.kubernetes.io/version: 3.3.1
+  endpoints:
+  - port: http-metrics 
+    path: /metrics
+    interval: 15s
+    targetPort: 3100 
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki-write
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+    - logging
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: write
+      app.kubernetes.io/version: 3.3.1
+  endpoints:
+  - port: http-metrics 
+    path: /metrics
+    interval: 15s
+    targetPort: 3100 
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki-backend
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+    - logging
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: backend
+      app.kubernetes.io/version: 3.3.1
+  endpoints:
+  - port: http-metrics 
+    path: /metrics
+    interval: 15s
+    targetPort: 3100 

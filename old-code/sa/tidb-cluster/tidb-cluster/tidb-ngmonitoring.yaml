@@ -1,0 +1,15 @@
+apiVersion: pingcap.com/v1alpha1
+kind: TidbNGMonitoring
+metadata:
+  name: tidb-ngmonitoring
+  namespace: g101-tidb
+spec:
+  clusters:
+  - name: g101-prod
+    namespace: 
+  ngMonitoring:
+    requests:
+      storage: 10Gi
+    version: v8.1.0
+    storageClassName: gp2
+    baseImage: pingcap/ng-monitoring

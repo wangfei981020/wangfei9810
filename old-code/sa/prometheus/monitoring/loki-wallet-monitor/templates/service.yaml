@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "loki-wallet-monitor.fullname" . }}
+  labels:
+    {{- include "loki-wallet-monitor.labels" . | nindent 4 }}
+    {{- if .Values.prometheusDiscoveryEnabled }}
+    micrometer-prometheus-discovery: "true"
+    {{- end }}
+  {{- if .Values.service.annotations }}
+  annotations:
+    app: {{ include "loki-wallet-monitor.name" . }}
+    {{- toYaml .Values.service.annotations | nindent 4 }}
+  {{- end }} 
+
+spec:
+  ports:
+    {{- range .Values.service.ports }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: TCP
+      name: {{ .name }}
+    {{- end }}
+
+  selector:
+    {{- include "loki-wallet-monitor.selectorLabels" . | nindent 4 }}

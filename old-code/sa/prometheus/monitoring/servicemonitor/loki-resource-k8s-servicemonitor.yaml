@@ -1,0 +1,20 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki-resource-k8s-servicemonitor
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  endpoints:
+  - interval: 60s
+    path: /actuator/prometheus
+    port: metrics
+  namespaceSelector:
+    matchNames:
+      - monitoring
+  selector:
+    matchLabels:
+      micrometer-prometheus-discovery: 'true'
+      app.kubernetes.io/name: loki-resource

@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: loki-test-g32
+  namespace: logging
+spec:
+  gateways:
+    - istio-system/g32-istio-ingressgateway-inner
+  hosts:
+    - loki-test-g32.g32-prod.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: loki-gateway.logging.svc.cluster.local
+        port:
+          number: 80

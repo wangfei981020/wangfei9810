@@ -1,0 +1,24 @@
+apiVersion: pingcap.com/v1alpha1
+kind: Backup
+metadata:
+  name: g101-tidb-data
+  namespace: g101-tidb
+spec:
+  backupType: full
+  br:
+    cluster: g101-prod
+    clusterNamespace: g101-tidb
+    # logLevel: info
+    # statusAddr: ${status-addr}
+    # concurrency: 4
+    # rateLimit: 0
+    # checksum: true
+    # sendCredToTikv: true
+    # options:
+    # - --lastbackupts=420134118382108673
+  s3:
+    provider: aws
+    secretName: s3-secret
+    region: ap-east-1
+    bucket: g101-prod
+    prefix: g101_tidb_data

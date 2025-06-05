@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  #name: event-dict-pvc
+  name: loki-wallet-pvc
+  annotations:
+    "helm.sh/resource-policy": "keep"  # 保留 PVC
+spec:
+  accessModes:
+    #- ReadWriteMany
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+
