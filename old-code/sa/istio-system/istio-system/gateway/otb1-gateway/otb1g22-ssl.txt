@@ -1,4 +1,4 @@
-kubectl create secret tls g22-prod-com-cert \
-  --cert=g22-prod.com.crt \
-  --key=g22-prod.com.key \
+kubectl create secret tls otb1-prod-com-cert \
+  --cert=otb1-prod.com.crt \
+  --key=otb1-prod.com.key \
   --namespace=istio-system
