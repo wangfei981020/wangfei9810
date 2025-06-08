@@ -15,3 +15,8 @@ kubectl label namespace ns-name istio-injection-
 
 # 动态查看 svc ip
 watch -n 1 "kubectl get endpoints svc-name -n ns-name -o jsonpath='{.subsets[*].addresses[*].ip}'"
+
+# 扩容 pvc
+kubectl edit pvc be-storage-g32-prod-doriscluster-be-0 -n doris
+kubectl edit pvc be-storage-g32-prod-doriscluster-be-1 -n doris
+kubectl edit pvc be-storage-g32-prod-doriscluster-be-2 -n doris
