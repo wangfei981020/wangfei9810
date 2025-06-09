@@ -20,3 +20,11 @@ watch -n 1 "kubectl get endpoints svc-name -n ns-name -o jsonpath='{.subsets[*].
 kubectl edit pvc be-storage-g32-prod-doriscluster-be-0 -n doris
 kubectl edit pvc be-storage-g32-prod-doriscluster-be-1 -n doris
 kubectl edit pvc be-storage-g32-prod-doriscluster-be-2 -n doris
+
+# 更新 证书 secrets
+kubectl create secret tls cert-name \
+  --cert=xxx.crt \
+  --key=xxx.key \
+  --namespace=istio-system \
+  --dry-run=client -o yaml | kubectl apply -f -
+
