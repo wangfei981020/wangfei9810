@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: metersphere
+  namespace: metersphere2
+spec:
+  gateways:
+  - istio-system/main-gw-ops
+  hosts:
+  - ppu-metersphere.slleisure.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: metersphere-gateway.metersphere2.svc.cluster.local
+        port:
+          number: 8000

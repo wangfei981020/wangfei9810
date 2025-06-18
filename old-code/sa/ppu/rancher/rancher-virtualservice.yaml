@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: rancher
+  namespace: cattle-system
+spec:
+  gateways:
+  - istio-system/extra-gateway
+  - istio-system/main-gateway
+  hosts:
+    - prod-rancher.slleisure.com
+    - prod-rancher.sldevops.net
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: rancher.cattle-system.svc.cluster.local
+        port:
+          number: 80

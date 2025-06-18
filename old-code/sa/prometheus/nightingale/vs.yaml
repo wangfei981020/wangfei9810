@@ -1,0 +1,44 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: nightingale
+  namespace: n9e
+  annotations:
+    meta.helm.sh/release-name: nightingale
+    meta.helm.sh/release-namespace: n9e
+  labels:
+    app.kubernetes.io/instance: nightingale
+    app.kubernetes.io/name: nightingale
+spec:
+  gateways:
+    - istio-system/main-gw-ops
+  hosts:
+    - ppu-n9e.slleisure.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: nightingale.n9e.svc.cluster.local
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: nightingale-mysql
+  namespace: n9e
+spec:
+  gateways:
+    - istio-system/main-gw-ops
+  hosts:
+    - ppu-n9e-mysql.slleisure.com
+  tcp:
+  - match:
+    - port: 3306
+    route:
+    - destination:
+        host: nightingale-mysql.n9e.svc.cluster.local
+        port:
+          number: 3306

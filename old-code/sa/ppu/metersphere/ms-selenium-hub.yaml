@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-hub
+  namespace: metersphere2
+spec:
+  selector:
+    matchLabels:
+      app: selenium-hub
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: selenium-hub
+    spec:
+      volumes:
+      - name: dshm
+        emptyDir:
+            medium: Memory
+      containers:
+        - name: selenium-hub
+          image: registry.cn-qingdao.aliyuncs.com/metersphere/seleniarm-grid-all:4.1.4-20220519
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - mountPath: /dev/shm
+            name: dshm
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: SE_EVENT_BUS_HOST
+              value: "127.0.0.1"
+            - name: SE_EVENT_BUS_PUBLISH_PORT
+              value: "4442"
+            - name: SE_EVENT_BUS_SUBSCRIBE_PORT
+              value: "4443"
+            - name: SE_HUB_PORT
+              value: "4444"
+            - name: SE_NODE_MAX_SESSIONS
+              value: "300"
+            - name: SE_NODE_OVERRIDE_MAX_SESSIONS
+              value: "true"
+            - name: browser
+              value: "chrome"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: selenium-hub
+  namespace: metersphere2
+spec:
+  ports:
+    - name: selenium-hub
+      port: 4444
+      targetPort: 4444
+      nodePort: 30444
+  type: NodePort
+  selector:
+    app: selenium-hub

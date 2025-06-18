@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: metersphere
+  namespace: metersphere
+spec:
+  gateways:
+  - istio-system/main-gw-ops
+  hosts:
+  - ppu-metersphere3.slleisure.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: metersphere.metersphere.svc.cluster.local
+        port:
+          number: 8081

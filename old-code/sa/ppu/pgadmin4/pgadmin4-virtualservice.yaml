@@ -1,0 +1,22 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: pgadmin4
+  namespace: db-services
+spec:
+  gateways:
+  - istio-system/main-gw-ops
+  hosts:
+    - ppu-pgadmin4.slleisure.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+#    rewrite:
+#      uri: "/"
+    route:
+    - destination:
+        host: pgadmin4.db-services.svc.cluster.local
+        port:
+          number: 80
+

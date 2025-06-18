@@ -1,0 +1,15 @@
+{{ if and .Values.minio.enabled .Values.minio.persistence.enabled}}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: minio-data-pvc
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  accessModes:
+    - {{.Values.minio.persistence.accessModes}}
+  resources:
+    requests:
+      storage: {{.Values.minio.persistence.size}}
+  storageClassName: {{.Values.common.storageClass}}
+{{end}}  

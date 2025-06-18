@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kubesphere
+  namespace: kubesphere-system
+spec:
+  gateways:
+  - istio-system/main-gw-ops
+  hosts:
+    - ppu-kubesphere.slleisure.com
+    - uat-kubesphere.slleisure.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: ks-console.kubesphere-system.svc.cluster.local
+        port:
+          number: 80

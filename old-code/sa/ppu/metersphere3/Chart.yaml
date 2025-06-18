@@ -1,0 +1,17 @@
+apiVersion: v2
+appVersion: 3.6.2-lts
+dependencies:
+- condition: kafka.enabled
+  name: kafka
+  repository: https://charts.bitnami.com/bitnami
+  version: 26.0.0
+description: A Helm chart to deploy MeterSphere
+home: https://metersphere.io
+icon: https://metersphere.io/images/logo/favicon.ico
+maintainers:
+- email: metersphere@fit2cloud.com
+  name: metersphere
+name: metersphere3
+sources:
+- https://github.com/metersphere/
+version: 3.6.2
