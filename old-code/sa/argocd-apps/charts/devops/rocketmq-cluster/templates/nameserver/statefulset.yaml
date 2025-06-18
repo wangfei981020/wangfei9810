@@ -1,0 +1,151 @@
+{{- with .Values.nameserver -}}
+{{- $clusterRole := "nameserver" -}}
+{{- $configmapName := include "rocketmq.configmap.fullname" $ -}}
+{{- $image := printf "%s:%s" $.Values.image.repository $.Values.image.tag }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "rocketmq.nameserver.fullname" $ | quote }}
+  labels:
+    {{- include "rocketmq.labels" $ | nindent 4 }}
+    {{- with .labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  minReadySeconds: {{ .minReadySeconds | default 20 }}
+  replicas: {{ .replicaCount }}
+  podManagementPolicy: {{ .podManagementPolicy | default "Parallel" }}
+  {{- with .updateStrategy }}
+  updateStrategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rocketmq.selectorLabels" $ | nindent 6 }}
+      component: {{ $clusterRole }}
+  serviceName: "{{ include "rocketmq.nameserver.fullname" $ }}-headless"
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
+        {{- with .podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "rocketmq.selectorLabels" $ | nindent 8 }}
+        component: {{ $clusterRole }}
+        {{- with .podLables }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if not .affinityOverride }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 5
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  {{- include "rocketmq.selectorLabels" $ | nindent 18 }}
+                  component: nameserver
+              topologyKey: kubernetes.io/hostname
+      {{- else if .affinityOverride }}
+      affinity:
+        {{- toYaml .affinityOverride | nindent 8 }}
+      {{- end }}
+      {{- with .tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: nameserver
+        image: {{ $image | quote }}
+        imagePullPolicy: {{ $.Values.image.pullPolicy | default "IfNotPresent" }}
+        command:
+          - sh
+          - /mq-server-start.sh
+        env:
+        - name: ROCKETMQ_PROCESS_ROLE
+          value: {{ $clusterRole }}
+        - name: ROCKETMQ_JAVA_OPTIONS_HEAP
+          {{- $maxHeapSize := .jvm.maxHeapSize }}
+          value: {{ printf "-Xms%s -Xmx%s" $maxHeapSize $maxHeapSize }}
+        {{- if and .jvm .jvm.javaOptsOverride }}
+        - name: ROCKETMQ_JAVA_OPTIONS_OVERRIDE
+          value: {{ .jvm.javaOptsOverride | quote }}
+        {{- end }}
+        {{- if eq (include "rocketmq.enableControllerInNamesrv" $) "true" }}
+        - name: enableControllerInNamesrv
+          value: "true"
+        {{- end }}
+        ports:
+        - containerPort: 9876
+          name: main
+          protocol: TCP
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+        {{- with .readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .livenessProbe }}
+        livenessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sh", "-c", "sleep 5; ./mqshutdown namesrv"]
+        volumeMounts:
+        - mountPath: /mq-server-start.sh
+          name: mq-server-start-sh
+          subPath: mq-server-start.sh
+        - mountPath: /etc/rocketmq/base-cm
+          name: base-cm
+        - mountPath: /home/rocketmq/logs
+          name: nameserver-storage
+          subPath: logs
+        {{- if eq (include "rocketmq.enableControllerInNamesrv" $) "true" }}
+        - mountPath: /home/rocketmq/controller-data
+          name: nameserver-storage
+          subPath: controller-data
+        {{- end }}
+      dnsPolicy: ClusterFirst
+      terminationGracePeriodSeconds: {{ .terminationGracePeriodSeconds | default 15 }}
+      volumes:
+      - configMap:
+          items:
+          - key: mq-server-start.sh
+            path: mq-server-start.sh
+          name: {{ $configmapName }}
+          defaultMode: 0755
+        name: mq-server-start-sh
+      - configMap:
+          name: {{ include "rocketmq.configmap.fullname" $ }}
+        name: base-cm
+  {{- if not .persistence.enabled }}
+      - name: nameserver-storage
+        emptyDir: {}
+  {{- else }}
+  volumeClaimTemplates:
+    - metadata:
+        name: nameserver-storage
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        {{- with .persistence.storageClass }}
+        storageClassName: {{ if (eq "-" .) }}""{{ else }}{{ . }}{{ end }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .persistence.size | quote }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,34 @@
+{{- with .Values.dashboard }}
+{{- if and .enabled .auth .auth.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rocketmq.dashboard.configmap.fullname" $ | quote }}
+data:
+  {{- if .auth.users }}
+  users.properties: |
+    {{- range .auth.users }}
+    {{ .name }}={{ .password }}{{ if .isAdmin }},1{{ end }}
+    {{- end }}
+  {{- else }}
+  users.properties: |
+    admin=admin,1
+  {{- end }}
+  role-permission.yml: |
+    rolePerms:
+      ordinary:
+        - /rocketmq/nsaddr
+        - /ops/*
+        - /dashboard/**
+        - /topic/*.query
+        - /topic/sendTopicMessage.do
+        - /producer/*.query
+        - /message/*
+        - /messageTrace/*
+        - /monitor/*
+        # Add cluster and consumer permission by logic
+        - /cluster/*.query
+        - /consumer/*.query
+        - /consumerGroup/*.query
+{{- end }}
+{{- end }}

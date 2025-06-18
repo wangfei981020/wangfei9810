@@ -1,0 +1,9 @@
+dependencies:
+- name: common
+  repository: https://ygqygq2.github.io/charts
+  version: 2.13.2
+- name: mysql
+  repository: https://ygqygq2.github.io/charts
+  version: 9.5.0
+digest: sha256:f2660ad5d1a96fe1aee6065734e50e6eecbf93307128e23ccb0593f8d2d76c21
+generated: "2023-12-13T07:52:05.566507619Z"

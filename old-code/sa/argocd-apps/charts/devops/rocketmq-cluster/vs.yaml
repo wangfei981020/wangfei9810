@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  labels:
+    app.kubernetes.io/instance: rocketmq
+    app.kubernetes.io/name: rocketmq
+    component: dashboard
+  name: rocketmq-dashboard
+  namespace: devops
+spec:
+  gateways:
+  - istio-system/g32-istio-ingressgateway-inner
+  hosts:
+  - rocketmq-ui.g32-prod.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: rocketmq-dashboard.rocketmq.svc.cluster.local
+        port:
+          number: 8080

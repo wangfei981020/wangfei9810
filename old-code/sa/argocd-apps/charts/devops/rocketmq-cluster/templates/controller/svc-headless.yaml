@@ -1,0 +1,28 @@
+{{- if and .Values.controller.enabled -}}
+{{- with .Values.controller.service -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rocketmq.controller.fullname" $ }}
+  labels:
+    {{- include "rocketmq.labels" $ | nindent 4 }}
+    component: controller
+    {{- with .labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  clusterIP: "None"
+  publishNotReadyAddresses: true
+  ports:
+  - port: 9878
+    protocol: TCP
+    targetPort: 9878
+  selector:
+    {{- include "rocketmq.selectorLabels" $ | nindent 4 }}
+    component: controller
+{{- end }}
+{{- end }}

@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "xxl-job-admin.fullname" . }}
+  labels:
+    {{- include "xxl-job-admin.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "xxl-job-admin.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret-sha: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/config-sha: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "xxl-job-admin.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "xxl-job-admin.fullname" . }}-config
+        {{- if .Values.skywalking.enabled }}
+        - name: skywalking-agent
+          emptyDir: {}
+        {{- end }}
+      serviceAccountName: {{ include "xxl-job-admin.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+      {{- with .Values.initContainers }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.skywalking.enabled }}
+        - name: agent-container
+          image: "apache/skywalking-java-agent:{{ .Values.skywalking.version }}-alpine"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: skywalking-agent
+              mountPath: /agent
+            - name: {{ include "xxl-job-admin.fullname" . }}-config
+              mountPath: /tmp
+          command: ["/bin/sh"]
+          args: ["/tmp/init_skywalking.sh"]
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- if or .Values.skywalking.enabled .Values.javaOpts }}
+            - name: JAVA_OPTS
+              value: >-
+                {{- if .Values.skywalking.enabled }}
+                -javaagent:/skywalking/agent/skywalking-agent.jar
+                {{- end }}
+                {{ .Values.javaOpts }}
+          {{- end }}
+          {{- with .Values.env }}
+            {{ toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom: 
+            - secretRef:
+                name: {{ include "xxl-job-admin.fullname" . }}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            {{- if .Values.skywalking.enabled }}
+            - name: skywalking-agent
+              mountPath: /skywalking
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.properties.server.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ include "xxl-job-admin.healthCheckEndpoint" . }}/liveness
+              port: http
+          readinessProbe:
+            httpGet:
+              path: {{ include "xxl-job-admin.healthCheckEndpoint" . }}/readiness
+              port: http
+          startupProbe:
+            httpGet:
+              port: http
+              path: {{ include "xxl-job-admin.healthCheckEndpoint" . }}/liveness
+            initialDelaySeconds: 15
+            failureThreshold: 30
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

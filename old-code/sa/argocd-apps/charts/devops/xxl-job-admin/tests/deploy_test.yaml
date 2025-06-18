@@ -1,0 +1,86 @@
+suite: test deploy
+templates:
+  - deployment.yaml
+  - config.yaml
+  - secret.yaml
+tests:
+  - it: should render Deployment without skywalking, initContainers, env
+    template: deployment.yaml
+    set:
+      skywalking:
+        enabled: false
+      # env:
+      #   - name: test
+      #     value: test
+    asserts:
+      - isKind:
+          of: Deployment
+      - isEmpty:
+          path: spec.template.spec.initContainers
+      - isEmpty:
+          path: spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.template.spec.containers[0].volumeMounts
+          count: 1
+      - lengthEqual:
+          path: spec.template.spec.volumes
+          count: 1
+  - it: should enable skywalking if skywalking.enabled == true
+    template: deployment.yaml
+    set:
+      skywalking.enabled: true
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.initContainers
+          count: 1
+      - lengthEqual:
+          path: spec.template.spec.containers[0].env
+          count: 1
+      - lengthEqual:
+          path: spec.template.spec.containers[0].volumeMounts
+          count: 2
+      - lengthEqual:
+          path: spec.template.spec.volumes
+          count: 2
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: agent-container
+  - it: should enable init container
+    template: deployment.yaml
+    set:
+      initContainers:
+        - name: init1
+          image: test
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.initContainers
+          count: 1
+      - isEmpty:
+          path: spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.template.spec.containers[0].volumeMounts
+          count: 1
+      - lengthEqual:
+          path: spec.template.spec.volumes
+          count: 1
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: init1
+  - it: should enable add env
+    template: deployment.yaml
+    set:
+      env:
+        - name: ENV_1
+          value: test
+    asserts:
+      - isEmpty:
+          path: spec.template.spec.initContainers
+      - lengthEqual:
+          path: spec.template.spec.containers[0].env
+          count: 1
+      - lengthEqual:
+          path: spec.template.spec.containers[0].volumeMounts
+          count: 1
+      - lengthEqual:
+          path: spec.template.spec.volumes
+          count: 1

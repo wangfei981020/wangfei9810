@@ -1,0 +1,28 @@
+{{- if .Values.ingressGateway.enabled }}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ include "redisinsight-chart.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+{{ include "redisinsight-chart.labels" . | indent 4 }}
+spec:
+  gateways:
+    - {{ .Values.ingressGateway.name | quote }}
+  hosts:
+    {{- range .Values.ingressGateway.host }}
+    - {{ . | quote }}
+    {{- end }}
+  http:
+  - match:
+    {{- range .Values.ingressGateway.matchPrefix }}
+    - uri:
+        prefix: {{ . | quote }}
+    {{- end }}
+    route:
+    - destination:
+        host: {{ (print (include "redisinsight-chart.fullname" .) "." .Release.Namespace ".svc.cluster.local") | quote }}
+        port:
+          number: {{ .Values.ingressGateway.port }}
+{{- end }}
+

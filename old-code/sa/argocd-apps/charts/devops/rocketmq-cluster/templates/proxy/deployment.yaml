@@ -1,0 +1,133 @@
+{{- with .Values.proxy -}}
+{{- if .enabled -}}
+{{- $clusterRole := "proxy" -}}
+{{- $configmapName := include "rocketmq.configmap.fullname" $ -}}
+{{- $image := printf "%s:%s" $.Values.image.repository $.Values.image.tag }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rocketmq.proxy.fullname" $ | quote }}
+  labels:
+    {{- include "rocketmq.labels" $ | nindent 4 }}
+    {{- with .labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  minReadySeconds: {{ .minReadySeconds | default 20 }}
+  replicas: {{ .replicaCount }}
+  {{- with .updateStrategy }}
+  updateStrategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rocketmq.selectorLabels" $ | nindent 6 }}
+      component: {{ $clusterRole }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
+        {{- with .podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "rocketmq.selectorLabels" $ | nindent 8 }}
+        component: {{ $clusterRole }}
+        {{- with .podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if not .affinityOverride }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 5
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  {{- include "rocketmq.selectorLabels" $ | nindent 18 }}
+                  component: proxy
+              topologyKey: kubernetes.io/hostname
+      {{- else if .affinityOverride }}
+      affinity:
+        {{- toYaml .affinityOverride | nindent 8 }}
+      {{- end }}
+      {{- with .tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: proxy
+        image: {{ $image | quote }}
+        imagePullPolicy: {{ $.Values.image.pullPolicy | default "IfNotPresent" }}
+        command:
+          - sh
+          - /mq-server-start.sh
+        env:
+        - name: NAMESRV_ADDR
+          value: {{ include "rocketmq.nameserver.addr" $ }}
+        - name: ROCKETMQ_PROCESS_ROLE
+          value: {{ $clusterRole }}
+        - name: RMQ_PROXY_CONFIG_PATH
+          value: /etc/rocketmq/proxy.json
+        - name: ROCKETMQ_JAVA_OPTIONS_HEAP
+          {{- $maxHeapSize := .jvm.maxHeapSize }}
+          value: {{ printf "-Xms%s -Xmx%s" $maxHeapSize $maxHeapSize }}
+        {{- if and .jvm .jvm.javaOptsOverride }}
+        - name: ROCKETMQ_JAVA_OPTIONS_OVERRIDE
+          value: {{ .jvm.javaOptsOverride | quote }}
+        {{- end }}
+        ports:
+        - name: main
+          containerPort: 8080
+          protocol: TCP
+        - name: grpc
+          containerPort: 8081
+          protocol: TCP
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+        {{- with .readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .livenessProbe }}
+        livenessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sh", "-c", "sleep 5; ./mqshutdown {{ $clusterRole }}"]
+        volumeMounts:
+        - mountPath: /mq-server-start.sh
+          name: mq-server-start-sh
+          subPath: mq-server-start.sh
+        - mountPath: /etc/rocketmq/proxy.json
+          name: proxy-json
+          subPath: proxy.json
+      dnsPolicy: ClusterFirst
+      terminationGracePeriodSeconds: {{ .terminationGracePeriodSeconds | default 15 }}
+      volumes:
+      - configMap:
+          items:
+          - key: mq-server-start.sh
+            path: mq-server-start.sh
+          name: {{ $configmapName }}
+          defaultMode: 0755
+        name: mq-server-start-sh
+      - configMap:
+          items:
+          - key: proxy.json
+            path: proxy.json
+          name: {{ $configmapName }}
+        name: proxy-json
+{{- end }}
+{{- end }}

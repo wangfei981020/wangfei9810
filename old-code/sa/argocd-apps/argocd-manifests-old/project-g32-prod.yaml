@@ -1,0 +1,23 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: g32-prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: g32 Monte Prod
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: '*'
+    server: https://E83B7244AD441D3FB72C7C41771C6CAD.yl4.ap-east-1.eks.amazonaws.com
+    # old g32-prod
+    # server: https://37C0FF18617CC22F77FC0F925DFC505E.yl4.ap-east-1.eks.amazonaws.com
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'

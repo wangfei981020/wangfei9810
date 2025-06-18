@@ -1,0 +1,25 @@
+{{- if .Values.ingressGateway.enabled }}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+{{ include "common.labels.standard" . | indent 4 }}
+spec:
+  gateways:
+    - {{ .Values.ingressGateway.name | quote }}
+  hosts:
+    - {{ .Values.ingressGateway.host | quote }}
+  http:
+  - match:
+    {{- range .Values.ingressGateway.matchPrefix }}
+    - uri:
+        prefix: {{ . | quote }}
+    {{- end }}
+    route:
+    - destination:
+        host: {{ (print (include "common.names.fullname" .) "." .Release.Namespace ".svc.cluster.local") | quote }}
+        port:
+          number: {{ .Values.ingressGateway.port }}
+{{- end }}

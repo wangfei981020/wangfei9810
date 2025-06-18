@@ -1,0 +1,13 @@
+apiVersion: v2
+appVersion: 4.9.7
+description: RocketMQ Helm chart
+keywords:
+- rocketmq
+- kubernetes
+- apache
+maintainers:
+- name: itboon
+  url: https://github.com/itboon/rocketmq-helm
+name: rocketmq-cluster
+type: application
+version: 12.3.1

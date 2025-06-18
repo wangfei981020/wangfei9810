@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps-g32-prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: g32-prod
+  source:
+    repoURL: 'https://gitlab-devops.slleisure.com/argocd/g32-prod-deployment.git'
+    targetRevision: HEAD
+    path: argocd-apps/charts/g32-prod-apps
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://10.199.0.31
+    namespace: g32-prod
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: false
+    syncOptions:
+    - CreateNamespace=true

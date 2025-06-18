@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: redis-cluster
+  namespace: devops
+spec:
+  gateways:
+  - istio-system/g32-istio-ingressgateway-inner
+  hosts:
+  - redis.g32-prod.com
+  tcp:
+  - match:
+    - port: 6379
+    route:
+    - destination:
+        host: redis-cluster.redis.svc.cluster.local
+        port:
+          number: 6379

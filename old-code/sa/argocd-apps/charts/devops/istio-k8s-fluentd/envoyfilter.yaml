@@ -1,0 +1,60 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: enable-accesslog-json-format
+  namespace: istio-system 
+spec:
+  configPatches:
+    - applyTo: NETWORK_FILTER
+      match:
+        context: ANY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+      patch:
+        operation: MERGE
+        value:
+          typed_config:
+            "@type": "type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager"
+            access_log:
+              - name: envoy.access_loggers.file
+                typed_config:
+                  "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
+                  path: "/dev/stdout"
+                  log_format:
+                    json_format:
+                      start_time: "%START_TIME%"
+                      route_name: "%ROUTE_NAME%"
+                      #method: "%REQ(:METHOD)%" #request_method
+                      request_method: "%REQ(:METHOD)%"
+                      #path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%" #更名为request
+                      request: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+                      #protocol: "%PROTOCOL%"  #更名为scheme
+                      scheme: "%PROTOCOL%"
+                      response_code: "%RESPONSE_CODE%"
+                      response_flags: "%RESPONSE_FLAGS%"
+                      response_code_details: "%RESPONSE_CODE_DETAILS%"
+                      connection_termination_details: "%CONNECTION_TERMINATION_DETAILS%"
+                      bytes_received: "%BYTES_RECEIVED%"
+                      bytes_sent: "%BYTES_SENT%"
+                      duration: "%DURATION%"
+                      x_forwarded_for: "%REQ(X-FORWARDED-FOR)%"
+                      #user_agent: "%REQ(USER-AGENT)%" #更名为http_user_agent
+                      http_user_agent: "%REQ(USER-AGENT)%"
+                      request_id: "%REQ(X-REQUEST-ID)%"
+                      #authority: "%REQ(:AUTHORITY)%" #更名为domain
+                      domain: "%REQ(:AUTHORITY)%"
+                      upstream_host: "%UPSTREAM_HOST%"
+                      upstream_cluster: "%UPSTREAM_CLUSTER%"
+                      #upstream_service_time: "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%" #更名为upstreamtime
+                      upstreamtime: "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+                      #upstream_local_address: "%UPSTREAM_LOCAL_ADDRESS%" #更名为upstreamaddr
+                      upstreamaddr: "%UPSTREAM_LOCAL_ADDRESS%"
+                      downstream_local_address: "%DOWNSTREAM_LOCAL_ADDRESS%"
+                      downstream_remote_address: "%DOWNSTREAM_REMOTE_ADDRESS%"
+                      #ip: "%DOWNSTREAM_REMOTE_ADDRESS_WITHOUT_PORT%"
+                      requested_server_name: "%REQUESTED_SERVER_NAME%"
+                      upstream_transport_failure_reason: "%UPSTREAM_TRANSPORT_FAILURE_REASON%"
+                      cf_ray: "%REQ(CF-RAY)%"
+                      cf_ipcountry: "%REQ(CF-IPCOUNTRY)%"
