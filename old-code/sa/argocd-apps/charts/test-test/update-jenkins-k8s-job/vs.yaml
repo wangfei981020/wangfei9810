@@ -1,0 +1,25 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: update-jenkins-k8s-job
+  namespace: cesar
+  annotations:
+    meta.helm.sh/release-name: update-jenkins-k8s-job
+    meta.helm.sh/release-namespace: devops
+  labels:
+    app.kubernetes.io/instance: update-jenkins-k8s-job
+    app.kubernetes.io/name: update-jenkins-k8s-job
+spec:
+  gateways:
+    - istio-system/main-gateway
+  hosts:
+    - infra-k8s-jenkins-test.slleisure.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: update-jenkins-k8s-job.cesar.svc.cluster.local
+        port:
+          number: 8080

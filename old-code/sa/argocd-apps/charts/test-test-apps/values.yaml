@@ -1,0 +1,22 @@
+global:
+  env: test
+  helmDefault: false
+  valuesFile: values.yaml
+  spec:
+    project: test-test  #还对应着gitlab目录
+    destination:
+      # server: https://10.161.177.8
+      server: https://1149B5A9325A367EBEE8D9431290B381.sk1.ap-east-1.eks.amazonaws.com
+      namespace: test-test
+    source:
+      repoURL: https://gitlab-devops.slleisure.com/argocd/test-argocd.git
+      targetRevision: HEAD
+
+argocdApplications:
+#test
+  update-jenkins-k8s-job:
+    disableAutomated: false
+    disable: false
+    name: update-jenkins-k8s-job
+    helm: true
+    namespace: test-test

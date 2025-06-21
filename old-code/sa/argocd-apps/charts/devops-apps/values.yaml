@@ -1,0 +1,25 @@
+global:
+  env: uat
+  helmDefault: false
+  valuesFile: values.yaml
+  spec:
+    project: devops
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: devops
+    source:
+      repoURL: https://gitlab-devops.slleisure.com/argocd/ppu-k8s-platform.git
+      #repoURL: https://gitlab-devops-internet.slleisure.com/argocd/ppu-k8s-platform.git
+      targetRevision: HEAD
+
+argocdApplications:
+  flink:
+    disableAutomated: false
+    disable: true
+    name: flink
+    helm: true
+  x509-certificate-exporter:
+    disableAutomated: false
+    disable: true
+    name: x509-certificate-exporter
+    helm: true
