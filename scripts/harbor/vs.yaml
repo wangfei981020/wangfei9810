@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: harbor
+  namespace: devops
+spec:
+  gateways:
+  - istio-system/extra-gateway
+  - istio-system/main-gateway
+  hosts:
+  - harbor.xxx.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: harbor.devops.svc.cluster.local
+        port:
+          number: 80
