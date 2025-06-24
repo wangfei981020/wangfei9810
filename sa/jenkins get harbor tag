@@ -1,0 +1,39 @@
+import groovy.json.JsonSlurper
+import java.net.HttpURLConnection
+import java.net.URL
+
+def projectName = "项目"
+def repoName = "模块名"
+
+def url = "https://harbor域名/api/v2.0/projects/${projectName}/repositories/${repoName}/artifacts?with_tag=true"
+def headers = [
+    'Accept': 'application/json',
+    'X-Accept-Vulnerabilities': 'application/vnd.security.vulnerability.report; version=1.1, application/vnd.scanner.adapter.vuln.report.harbor+json; version=1.0',
+    'Authorization': 'Basic (token)'
+]
+
+def connection = new URL(url).openConnection() as HttpURLConnection
+connection.requestMethod = 'GET'
+
+headers.each { key, value ->
+    connection.setRequestProperty(key, value)
+}
+
+def responseMessage = connection.inputStream.text
+def jsonSlurper = new JsonSlurper()
+def jsonResponse = jsonSlurper.parseText(responseMessage)
+
+def artifactTags = jsonResponse.collect { artifact ->
+    def tags = artifact['tags']
+    if (tags != null && tags.size() > 0) {
+        return tags[0]['name']
+    }
+}
+
+connection.disconnect()
+
+def result = artifactTags.collect { tag -> 
+    return "${repoName}:${tag}"
+}
+
+//return artifactTags
