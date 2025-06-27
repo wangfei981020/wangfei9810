@@ -21,6 +21,12 @@ kubectl edit pvc be-storage-g32-prod-doriscluster-be-0 -n doris
 kubectl edit pvc be-storage-g32-prod-doriscluster-be-1 -n doris
 kubectl edit pvc be-storage-g32-prod-doriscluster-be-2 -n doris
 
+kubectl edit pvc prometheus-kube-prometheus-stack-prometheus-db-prometheus-kube-prometheus-stack-prometheus-0 -n monitoring
+kubectl edit pvc prometheus-kube-prometheus-stack-prometheus-db-prometheus-kube-prometheus-stack-prometheus-1 -n monitoring
+kubectl edit pvc prometheus-kube-prometheus-stack-prometheus-db-prometheus-kube-prometheus-stack-prometheus-2 -n monitoring
+kubectl edit pvc prometheus-kube-prometheus-stack-prometheus-db-prometheus-kube-prometheus-stack-prometheus-3 -n monitoring
+
+
 # 更新 证书 secrets
 kubectl create secret tls cert-name \
   --cert=xxx.crt \
