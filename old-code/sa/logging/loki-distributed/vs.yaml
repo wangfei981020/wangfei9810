@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: loki-distributed
+  namespace: loki
+spec:
+  gateways:
+  - istio-system/main-gw-ops
+  hosts:
+  - ppu-loki-distributed.slleisure.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: loki-distributed-query-frontend.loki.svc.cluster.local
+        port:
+          number: 3100
